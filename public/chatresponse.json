@@ -1,0 +1,260 @@
+{
+   "Mood Mentor": {
+    "greeting": "Hello! I am here to boost your mood today! 😊",
+    "question": "Tell me about your mood:",
+    "options": ["Sad", "Happy", "Confused", "Energetic"],
+    "responses": {
+      "Happy": {
+        "message": "That's wonderful! Happiness is contagious. What made your day so great? 🌟",
+        "followUp": [
+          "Spent time with family",
+          "Achieved a goal",
+          "Had fun with friends",
+          "Enjoyed a hobby"
+        ],
+        "responseMessages": {
+          "Spent time with family": [
+            "Family moments are priceless! Did you have a meaningful conversation or share a fun activity?",
+            "That sounds amazing! Spending time with loved ones is always special. What was the best part?"
+          ],
+          "Achieved a goal": [
+            "That’s fantastic! Accomplishing a goal is always rewarding. How did you celebrate?",
+            "Great job! Success is built on dedication. What’s your next big goal?"
+          ],
+          "Had fun with friends": [
+            "Friends make life better! What did you do together that made it so fun?",
+            "Laughter and good company are the best combo! Do you all have any fun traditions or inside jokes?"
+          ],
+          "Enjoyed a hobby": [
+            "That sounds fulfilling! What about this hobby brings you the most joy?",
+            "Awesome! Hobbies are a great way to unwind. Are you working on any special projects?"
+          ]
+        }
+      },
+      "Sad": {
+        "message": "I'm here for you. You’re not alone. Do you want to talk about what's making you feel this way? 💙",
+        "options": ["Yes", "No"],
+        "responseMessages": {
+          "Yes": [
+            "I'm listening. Sometimes, sharing your feelings can make things lighter. What's on your mind?",
+            "You can share as much or as little as you’d like. I'm here to support you. What’s been bothering you?"
+          ],
+          "No": [
+            "That’s okay. Everyone copes differently. Would you like to do something to lift your spirits?",
+            "I understand. Maybe a small mood-boosting activity could help. How about listening to music or taking a walk?"
+          ]
+        }
+      },
+      "Confused": {
+        "message": "I understand! Feeling confused can be tough. Do you need help sorting your thoughts or making a decision? 🤔",
+        "options": ["Sorting my thoughts", "Making a decision"],
+        "responseMessages": {
+          "Sorting my thoughts": [
+            "Sometimes, writing things down can bring clarity. Would you like to talk through it together?",
+            "It’s okay to feel overwhelmed. What’s the biggest thing on your mind right now?"
+          ],
+          "Making a decision": [
+            "Let’s break it down step by step. What are your main concerns about the decision?",
+            "Big decisions can be tricky! Would listing the pros and cons help?"
+          ]
+        }
+      },
+      "Energetic": {
+        "message": "Amazing! Energy is a great thing. How would you like to channel it today? ⚡",
+        "options": ["Exercise", "Creative activity", "Productive work", "Relaxation"],
+        "responseMessages": {
+          "Exercise": [
+            "Nice choice! Exercise keeps both mind and body strong. Do you prefer something intense like running or something relaxing like yoga?",
+            "Moving your body feels great! Are you trying a new workout or sticking to a favorite routine?"
+          ],
+          "Creative activity": [
+            "Creativity is a great way to express yourself! Are you painting, writing, or making music today?",
+            "That sounds exciting! What inspires your creativity the most?"
+          ],
+          "Productive work": [
+            "Productivity is so rewarding! What task are you tackling today?",
+            "Getting things done feels great! Do you have any productivity tips that work well for you?"
+          ],
+          "Relaxation": [
+            "Taking time to unwind is important. Do you prefer a quiet moment with tea or something like meditation?",
+            "Relaxation is key to recharging! What’s your go-to way to de-stress?"
+          ]
+        }
+      }
+    }
+  },
+    "Stress Buster": {
+      "greeting": "Hello! Let's work on reducing your stress today.",
+      "question": "What's making you feel stressed?",
+      "options": ["Work", "Personal life", "Uncertainty", "Overwhelmed"],
+      "responses": {
+        "Work": {
+          "message": "Work stress is tough! Would you like to talk about it or try a stress-relief technique?",
+          "options": ["Talk about it", "Try a technique"],
+          "responseMessages": {
+            "Talk about it": "I’m listening. What's the biggest challenge you're facing at work?",
+            "Try a technique": "Great choice! Let's try deep breathing. Take a slow breath in for 4 seconds, hold for 4 seconds, and breathe out for 4 seconds. Feeling any better?"
+          }
+        },
+        "Personal life": {
+          "message": "Relationships and personal matters can be stressful. Would you like to share what's on your mind?",
+          "options": ["Yes", "No"],
+          "responseMessages": {
+            "Yes": "I’m here for you. Sometimes, just talking can help lighten the burden.",
+            "No": "That’s okay. Would you like to do a grounding exercise instead?"
+          }
+        },
+        "Uncertainty": {
+          "message": "Uncertainty can be unsettling. Are you worried about the future or struggling with a decision?",
+          "options": ["Future worries", "Decision making"],
+          "responseMessages": {
+            "Future worries": "It’s okay to not have all the answers. Try focusing on what you can control today.",
+            "Decision making": "Let's break it down step by step. What are the options you're considering?"
+          }
+        },
+        "Overwhelmed": {
+          "message": "Feeling overwhelmed is tough. Would you like to prioritize your tasks or take a break?",
+          "options": ["Prioritize tasks", "Take a break"],
+          "responseMessages": {
+            "Prioritize tasks": "Let’s make a quick list! What’s the most urgent thing on your mind?",
+            "Take a break": "Sometimes stepping away helps. How about stretching, walking, or listening to music?"
+          }
+        }
+      }
+    },
+    "Dream Weaver": {
+        "greeting": "Hello, dreamer! Let's explore your thoughts and dreams together.",
+        "question": "What would you like to talk about?",
+        "options": ["A recent dream", "Sleep struggles", "Nightmares", "Lucid dreaming"],
+          "responses": {
+            "A recent dream": {
+              "message": "That sounds interesting! Would you like to analyze its meaning or just share it?",
+              "options": ["Analyze meaning", "Just share"],
+              "responseMessages": {
+                "Analyze meaning": "Dreams often reflect our thoughts and emotions. What symbols stood out to you?",
+                "Just share": "I'm listening! Feel free to describe your dream."
+              }
+            },
+            "Sleep struggles": {
+              "message": "Sleep is essential for well-being. What’s been affecting your rest?",
+              "options": ["Trouble falling asleep", "Waking up often", "Feeling unrested"],
+              "responseMessages": {
+                "Trouble falling asleep": "A bedtime routine might help! Have you tried relaxation techniques?",
+                "Waking up often": "That sounds frustrating. Do you remember what wakes you up?",
+                "Feeling unrested": "Quality sleep matters more than quantity. Have you noticed any patterns?"
+              }
+            },
+            "Nightmares": {
+              "message": "Nightmares can be unsettling. Would you like to understand their cause or learn ways to prevent them?",
+              "options": ["Understand cause", "Prevent them"],
+              "responseMessages": {
+                "Understand cause": "Nightmares often stem from stress or unresolved emotions. Has anything been on your mind?",
+                "Prevent them": "A calming bedtime routine can help. Have you tried meditation or journaling?"
+              }
+            },
+            "Lucid dreaming": {
+              "message": "Lucid dreaming is fascinating! Are you looking to experience it or improve your control?",
+              "options": ["Experience it", "Improve control"],
+              "responseMessages": {
+                "Experience it": "Keeping a dream journal and reality checks can help. Want to try a simple technique?",
+                "Improve control": "Amazing! Practicing visualization and intention-setting before sleep can enhance control."
+              }
+            }
+          }
+        },
+        "Relationship Rescuer": {
+            "greeting": "Hey there! Relationships can be tricky, but I'm here to help. What’s on your mind?",
+            "question": "What type of relationship are you seeking advice on?",
+            "options": ["Romantic", "Friendship", "Family", "Workplace"],
+            "responses": {
+            "Romantic": {
+                "message": "Love can be both beautiful and complex. What’s your concern?",
+                "options": ["Communication issues", "Trust issues", "Conflict resolution", "Moving on"],
+                "responseMessages": {
+                "Communication issues": "Honest conversations build strong relationships. What’s making communication difficult?",
+                "Trust issues": "Trust takes time and effort. Do you feel it's a past issue or something recent?",
+                "Conflict resolution": "Every couple faces conflicts. Would you like tips on handling disagreements?",
+                "Moving on": "Letting go can be hard, but it also opens new doors. How are you feeling about it?"
+                }
+            },
+            "Friendship": {
+                "message": "Friendships are important for our well-being. What’s going on?",
+                "options": ["Drifting apart", "Feeling left out", "Trust issues", "Making new friends"],
+                "responseMessages": {
+                "Drifting apart": "Sometimes friendships change over time. Would you like advice on reconnecting?",
+                "Feeling left out": "That must be tough. Do you think it's intentional or just circumstances?",
+                "Trust issues": "Trust is key in friendships. What happened to make you feel this way?",
+                "Making new friends": "Meeting new people can feel overwhelming. Would you like some conversation starters?"
+                }
+            },
+            "Family": {
+                "message": "Family dynamics can be complicated. What’s your concern?",
+                "options": ["Misunderstandings", "Parental expectations", "Sibling conflicts", "Feeling unappreciated"],
+                "responseMessages": {
+                "Misunderstandings": "Clear communication can help. Would you like tips on expressing your feelings?",
+                "Parental expectations": "Balancing personal goals with family expectations can be hard. Want some advice?",
+                "Sibling conflicts": "Siblings can be our biggest supporters and challengers. What’s been happening?",
+                "Feeling unappreciated": "You deserve to feel valued. Have you tried expressing your feelings to them?"
+                }
+            },
+            "Workplace": {
+                "message": "Work relationships impact our daily life. What’s troubling you?",
+                "options": ["Conflict with a colleague", "Unfair treatment", "Work-life balance", "Lack of support"],
+                "responseMessages": {
+                "Conflict with a colleague": "Workplace harmony is important. Would you like tips on handling conflicts professionally?",
+                "Unfair treatment": "That’s tough. Have you considered discussing it with HR or a supervisor?",
+                "Work-life balance": "Balancing work and personal life is crucial. Want some productivity and relaxation tips?",
+                "Lack of support": "A supportive work environment is key. Would you like help in building better connections?"
+                }
+            }
+        }
+    },
+    "Anxiety Ally": {
+        "greeting": "Hey there! Anxiety can be overwhelming, but you're not alone. How are you feeling right now?",
+        "question": "What’s causing you anxiety today?",
+        "options": ["Social situations", "Work/Studies", "Uncertain future", "General worry"],
+        "responses": {
+            "Social situations": {
+                "message": "Social anxiety can be tough, but small steps help! What part of socializing feels hardest?",
+                "options": ["Speaking in groups", "Meeting new people", "Public speaking", "Fear of judgment"],
+                "responseMessages": {
+                "Speaking in groups": "It’s okay to start small! Would you like some tips on easing into group conversations?",
+                "Meeting new people": "First impressions can be nerve-wracking! Want some conversation starters?",
+                "Public speaking": "You’re not alone—many people fear public speaking. Would breathing exercises help?",
+                "Fear of judgment": "It’s natural to worry, but your voice matters. Want to practice some confidence-building techniques?"
+                }
+            },
+            "Work/Studies": {
+                "message": "Deadlines and responsibilities can feel overwhelming. What’s stressing you out the most?",
+                "options": ["Upcoming deadlines", "Fear of failure", "Too much workload", "Lack of motivation"],
+                "responseMessages": {
+                "Upcoming deadlines": "Let’s break it down! Want help in creating a plan to manage your time better?",
+                "Fear of failure": "Failure is a part of growth. Would you like some positive affirmations?",
+                "Too much workload": "Feeling overwhelmed is valid. Would prioritization techniques help?",
+                "Lack of motivation": "We all feel stuck sometimes. Want to try a quick motivation exercise?"
+                }
+            },
+            "Uncertain future": {
+                "message": "The unknown can be scary, but you’re stronger than you think. What’s worrying you the most?",
+                "options": ["Career choices", "Financial worries", "Life changes", "Feeling lost"],
+                "responseMessages": {
+                "Career choices": "Choosing a path is tough, but you don’t have to do it alone. Want to explore your strengths?",
+                "Financial worries": "Money stress is real. Would budgeting or financial planning tips help?",
+                "Life changes": "Transitions are hard, but they also bring growth. Want to talk about how to adjust?",
+                "Feeling lost": "It’s okay to not have all the answers. Would you like a simple reflection exercise?"
+                }
+            },
+            "General worry": {
+                "message": "Sometimes, anxiety isn’t tied to one thing. How would you like to calm your mind?",
+                "options": ["Breathing exercises", "Journaling", "Listening to music", "Talking it out"],
+                "responseMessages": {
+                "Breathing exercises": "Deep breaths can help. Want to try a guided breathing technique?",
+                "Journaling": "Writing your thoughts can bring clarity. Would you like a journal prompt?",
+                "Listening to music": "Music can be healing. Want some relaxing playlist recommendations?",
+                "Talking it out": "Sometimes, just venting helps. Want a safe space to share your thoughts?"
+                }
+            }
+        }
+    }
+}
+  
