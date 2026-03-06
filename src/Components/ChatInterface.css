@@ -1,0 +1,21 @@
+.chat-interface-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 0;
+    overflow: hidden;
+}
+
+.chat-main-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: transparent;
+}
+
+@media (max-width: 768px) {
+    .chat-interface-container {
+        padding: 0;
+        height: calc(100vh - 80px);
+    }
+}
