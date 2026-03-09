@@ -121,7 +121,7 @@ const Chat = () => {
       {/* Current Mentor Identity Header */}
       <div className="active-mentor-header">
         <div className="header-left">
-          <button className="back-arrow-btn" onClick={() => navigate('/chat/chats')}>
+          <button className="back-arrow-btn" onClick={() => navigate(-1)}>
             <FaArrowLeft />
           </button>
           <img

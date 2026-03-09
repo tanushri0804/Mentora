@@ -12,24 +12,26 @@ import BottomNav from './Components/BottomNav';
 import Discover from './Components/Discover';
 import ChatList from './Components/ChatList';
 import Profile from './Components/Profile';
+import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Routes with Bottom Nav */}
-        <Route path="/chat/*" element={<ChatInterfaceWithTabs />} />
+          {/* Routes with Bottom Nav */}
+          <Route path="/chat/*" element={<ChatInterfaceWithTabs />} />
 
-
-        <Route path="/question-ans" element={<QuestionAns />} />
-        <Route path="/sleeptool" element={<Sleeptool />} />
-        <Route path="/creative" element={<Creative />} />
-      </Routes>
-    </Router>
+          <Route path="/question-ans" element={<QuestionAns />} />
+          <Route path="/sleeptool" element={<Sleeptool />} />
+          <Route path="/creative" element={<Creative />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
@@ -55,4 +57,3 @@ const ChatInterfaceWithTabs = () => (
 
 
 export default App;
-

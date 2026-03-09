@@ -1,14 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { user, loading, loginAsGuest, logout } = useAuth();
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setLoaded(true);
-  }, []);
+    
+    // If user is already logged in, redirect to chat
+    if (user && !loading) {
+      navigate('/chat/discover');
+    }
+  }, [user, loading, navigate]);
+
+  const handleGuestLogin = () => {
+    loginAsGuest();
+    navigate('/chat/discover');
+  };
+
+  // Show loading screen while checking auth
+  if (loading) {
+    return (
+      <div className="hero-page">
+        <div className="loading-screen">
+          <div className="loader"></div>
+          <p>Loading Mentora...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`hero-page ${loaded ? 'loaded' : ''}`}>
@@ -47,7 +71,7 @@ const HomePage = () => {
           <button className="hero-btn hero-btn-login" onClick={() => navigate('/login')}>
             Login
           </button>
-          <button className="hero-btn hero-btn-guest" onClick={() => navigate('/chat/discover')}>
+          <button className="hero-btn hero-btn-guest" onClick={handleGuestLogin}>
             Continue as Guest
             <span className="btn-arrow">→</span>
           </button>

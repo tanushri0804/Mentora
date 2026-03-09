@@ -1,9 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaHeartbeat, FaLeaf, FaRainbow, FaCompass, FaRegCommentDots, FaUser } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 import './BottomNav.css';
 
 const BottomNav = () => {
+    const { isGuest } = useAuth();
+
     return (
         <nav className="bottom-nav">
             <div className="nav-logo-desktop">
@@ -12,7 +15,6 @@ const BottomNav = () => {
             </div>
 
             <NavLink
-
                 to="/chat/discover"
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
@@ -58,7 +60,7 @@ const BottomNav = () => {
                 className={({ isActive }) => `nav-link profile-link ${isActive ? 'active' : ''}`}
             >
                 <FaUser />
-                <span>Profile</span>
+                <span>{isGuest ? 'Login' : 'Profile'}</span>
             </NavLink>
         </nav>
     );

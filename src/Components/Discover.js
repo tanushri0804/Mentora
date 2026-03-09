@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaComment, FaPlus, FaTimes, FaLock, FaGlobe, FaRobot } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 import './Discover.css';
 
 import moodAvtar from '../assets/moodAvtar.png';
@@ -13,6 +14,7 @@ const AVATAR_OPTIONS = [moodAvtar, stressAvtar, dreamAvtar, anxityAvtar, relatio
 
 const Discover = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [search, setSearch] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [editingMentorId, setEditingMentorId] = useState(null);
@@ -311,7 +313,7 @@ const Discover = () => {
             <header className="discover-header">
                 <div className="welcome-text">
                     <p className="welcome-greeting">Welcome back,</p>
-                    <h1 className="welcome-name">Explorer</h1>
+                    <h1 className="welcome-name">{user?.name || 'Explorer'}</h1>
                 </div>
                 <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
                     <div className="search-bar-container">

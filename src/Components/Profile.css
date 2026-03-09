@@ -228,3 +228,81 @@
         gap: 1rem;
     }
 }
+
+/* Guest Styles */
+.guest-login-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.guest-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.guest-login-card h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.guest-login-card p {
+    color: var(--text-muted);
+    max-width: 450px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.profile-login-btn {
+    background: #2a9d8f;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transition: var(--transition-smooth);
+    margin-top: 1rem;
+}
+
+.profile-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(42, 157, 143, 0.3);
+}
+
+.settings-section.disabled {
+    position: relative;
+    overflow: hidden;
+}
+
+.overlay-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
