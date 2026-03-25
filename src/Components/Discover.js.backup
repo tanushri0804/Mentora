@@ -1,0 +1,523 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaSearch, FaComment, FaPlus, FaLock, FaGlobe, FaRobot, FaStar } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
+import './Discover.css';
+
+const Discover = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [search, setSearch] = useState("");
+    const [chatbots, setChatbots] = useState([]);
+    const [userChatbots, setUserChatbots] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('discover'); // 'discover' or 'my-bots'
+
+    // Fetch chatbots from API
+    useEffect(() => {
+        if (user) {
+            fetchChatbots();
+            fetchUserChatbots();
+        }
+    }, [user, activeTab]);
+
+    const fetchChatbots = async () => {
+        try {
+            const token = localStorage.getItem('mentora_token');
+            if (!token) return;
+
+            const response = await fetch('http://localhost:5000/api/chatbots', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setChatbots(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch chatbots:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchUserChatbots = async () => {
+        try {
+            const token = localStorage.getItem('mentora_token');
+            if (!token) return;
+
+            const response = await fetch('http://localhost:5000/api/chatbots/my', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setUserChatbots(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch user chatbots:', error);
+        }
+    };
+
+    const handleChatbotClick = (chatbot) => {
+        // Navigate to chat with this chatbot
+        navigate(`/chat/chatbot/${chatbot.id}`);
+    };
+
+    const getOfficialBadge = (chatbot) => {
+        if (chatbot.isOfficial) {
+            return <span className="official-badge">Mentora Official</span>;
+        }
+        return null;
+    };
+
+    const getPrivacyBadge = (chatbot) => {
+        if (chatbot.isPublic) {
+            return <span className="public-badge">Public</span>;
+        }
+        return <span className="private-badge">Private</span>;
+    };
+
+    const filteredChatbots = chatbots.filter(chatbot => 
+        chatbot.name.toLowerCase().includes(search.toLowerCase()) ||
+        chatbot.description.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const displayChatbots = activeTab === 'discover' ? filteredChatbots : userChatbots;
+
+    if (!user) {
+        return (
+            <div className="discover-container">
+                <div className="auth-required">
+                    <h2>Please login to explore chatbots</h2>
+                    <button onClick={() => navigate('/login')} className="login-btn">
+                        Login to Continue
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="discover-container">
+                <div className="loading">
+                    <div className="spinner"></div>
+                    <p>Loading chatbots...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="discover-container">
+            <div className="discover-header">
+                <h1>AI Chatbots</h1>
+                <p>Explore AI companions for different wellness needs</p>
+            </div>
+
+            <div className="tabs">
+                <button 
+                    className={`tab-btn ${activeTab === 'discover' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('discover')}
+                >
+                    <FaGlobe /> Discover
+                </button>
+                <button 
+                    className={`tab-btn ${activeTab === 'my-bots' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('my-bots')}
+                >
+                    <FaRobot /> My Bots
+                </button>
+            </div>
+
+            {activeTab === 'discover' && (
+                <div className="search-bar">
+                    <FaSearch className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search chatbots..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+            )}
+
+            <div className="chatbots-grid">
+                {displayChatbots.map(chatbot => (
+                    <div 
+                        key={chatbot.id} 
+                        className="chatbot-card"
+                        onClick={() => handleChatbotClick(chatbot)}
+                    >
+                        <div className="chatbot-avatar">
+                            {chatbot.avatar ? (
+                                <img src={chatbot.avatar} alt={chatbot.name} />
+                            ) : (
+                                <div className="default-avatar">🤖</div>
+                            )}
+                        </div>
+                        
+                        <div className="chatbot-info">
+                            <div className="chatbot-header">
+                                <h3>{chatbot.name}</h3>
+                                <div className="badges">
+                                    {getOfficialBadge(chatbot)}
+                                    {getPrivacyBadge(chatbot)}
+                                </div>
+                            </div>
+                            
+                            <p className="chatbot-description">{chatbot.description}</p>
+                            
+                            <div className="chatbot-meta">
+                                <span className="category">{chatbot.category}</span>
+                                <span className="interactions">
+                                    <FaComment /> {chatbot.interactions || 0}
+                                </span>
+                                {chatbot.isOfficial && <FaStar className="official-star" />}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {displayChatbots.length === 0 && (
+                <div className="no-chatbots">
+                    <h3>No chatbots found</h3>
+                    <p>
+                        {activeTab === 'discover' 
+                            ? 'Try adjusting your search or check back later.'
+                            : 'You haven\'t created any chatbots yet.'
+                        }
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Discover;
+        setMentorDesc(mentor.desc);
+        setMentorPersonality(mentor.personality || '');
+        setMentorIntro(mentor.intro || '');
+        setMentorSuggestions(mentor.suggestions || ['', '', '']);
+        setMentorAvatar(mentor.img);
+        setMentorVisibility(mentor.visibility);
+        setEditingMentorId(mentor.id);
+        setIsCreating(true);
+    };
+
+    const handleCreateMentor = () => {
+        if (!mentorName.trim() || !mentorDesc.trim()) {
+            alert("Please provide a name and description for your mentor.");
+            return;
+        }
+
+        if (editingMentorId) {
+            // Update existing mentor
+            setMyMentors(myMentors.map(m => m.id === editingMentorId ? {
+                ...m,
+                name: mentorName.trim(),
+                desc: mentorDesc.trim(),
+                personality: mentorPersonality.trim(),
+                intro: mentorIntro.trim(),
+                suggestions: mentorSuggestions.filter(s => s.trim() !== ''),
+                img: mentorAvatar,
+                visibility: mentorVisibility
+            } : m));
+        } else {
+            // Create new mentor
+            const newMentor = {
+                id: `custom-${Date.now()}`,
+                name: mentorName.trim(),
+                author: "@you",
+                desc: mentorDesc.trim(),
+                personality: mentorPersonality.trim(),
+                intro: mentorIntro.trim(),
+                suggestions: mentorSuggestions.filter(s => s.trim() !== ''),
+                img: mentorAvatar,
+                chats: "0",
+                visibility: mentorVisibility,
+                isCustom: true,
+                createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            };
+            setMyMentors([newMentor, ...myMentors]);
+        }
+
+        setIsCreating(false);
+        resetForm();
+    };
+
+    const handleDeleteMentor = (id) => {
+        if (window.confirm("Delete this mentor permanently?")) {
+            setMyMentors(myMentors.filter(m => m.id !== id));
+        }
+    };
+
+    const AICard = ({ ai, showDelete }) => (
+        <div className="ai-card" onClick={() => handleSelectAI(ai.id)}>
+            <img src={ai.img} alt={ai.name} className="ai-card-avatar" />
+            <div className="ai-card-body">
+                <div className="ai-card-top-row">
+                    <h4 className="ai-card-name">{ai.name}</h4>
+                    {ai.isCustom && (
+                        <span className={`visibility-badge ${ai.visibility}`}>
+                            {ai.visibility === 'private' ? <FaLock size={9} /> : <FaGlobe size={9} />}
+                            {ai.visibility === 'private' ? 'Private' : 'Public'}
+                        </span>
+                    )}
+                </div>
+                <span className="ai-card-author">By {ai.author}</span>
+                <p className="ai-card-desc">{ai.desc}</p>
+                <div className="ai-card-footer">
+                    <div className="ai-card-stats">
+                        <FaComment className="stats-icon" />
+                        <span>{ai.chats}</span>
+                    </div>
+                    {showDelete && (
+                        <div className="card-action-btns">
+                            <button
+                                className="card-edit-btn"
+                                onClick={(e) => { e.stopPropagation(); startEditMentor(ai); }}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                className="card-delete-btn"
+                                onClick={(e) => { e.stopPropagation(); handleDeleteMentor(ai.id); }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    // ---- Creator View ----
+    if (isCreating) {
+        return (
+            <div className="discover-container">
+                <div className="creator-page">
+                    <button className="creator-back-btn" onClick={() => { setIsCreating(false); resetForm(); }}>
+                        <FaTimes /> Cancel
+                    </button>
+
+                    <div className="creator-header">
+                        <FaRobot className="creator-icon" />
+                        <h2>{editingMentorId ? 'Edit Your Mentor' : 'Create Your AI Mentor'}</h2>
+                        <p>{editingMentorId ? 'Update your mentor\'s details below.' : 'Build a personalized mentor that understands you. Choose to keep it private or share with the community.'}</p>
+                    </div>
+
+                    <div className="creator-form">
+                        <div className="creator-field">
+                            <label>Mentor Name</label>
+                            <input
+                                type="text"
+                                placeholder="e.g. My Calm Coach"
+                                value={mentorName}
+                                onChange={e => setMentorName(e.target.value)}
+                                className="creator-input"
+                            />
+                        </div>
+
+                        <div className="creator-field">
+                            <label>Description</label>
+                            <textarea
+                                placeholder="A brief summary of what this mentor does..."
+                                value={mentorDesc}
+                                onChange={e => setMentorDesc(e.target.value)}
+                                className="creator-input creator-textarea-sm"
+                            />
+                        </div>
+
+                        <div className="creator-field">
+                            <label>Behavior Details (System Prompt)</label>
+                            <textarea
+                                placeholder="How exactly should this ai behave? e.g. You are a professional therapist who uses humor..."
+                                value={mentorPersonality}
+                                onChange={e => setMentorPersonality(e.target.value)}
+                                className="creator-input creator-textarea"
+                            />
+                        </div>
+
+                        <div className="creator-field">
+                            <label>Intro Message</label>
+                            <textarea
+                                placeholder="What should the mentor say first? e.g. Hello! I'm Shinee. How are you feeling today?"
+                                value={mentorIntro}
+                                onChange={e => setMentorIntro(e.target.value)}
+                                className="creator-input creator-textarea-sm"
+                            />
+                        </div>
+
+                        <div className="creator-field">
+                            <label>Suggested Quick Replies</label>
+                            <div className="suggestions-list">
+                                {mentorSuggestions.map((suggestion, index) => (
+                                    <input
+                                        key={index}
+                                        type="text"
+                                        placeholder={`Option ${index + 1}`}
+                                        value={suggestion}
+                                        onChange={e => {
+                                            const newSuggestions = [...mentorSuggestions];
+                                            newSuggestions[index] = e.target.value;
+                                            setMentorSuggestions(newSuggestions);
+                                        }}
+                                        className="creator-input suggestion-input"
+                                    />
+                                ))}
+                                {mentorSuggestions.length < 5 && (
+                                    <button
+                                        className="add-suggestion-btn"
+                                        onClick={() => setMentorSuggestions([...mentorSuggestions, ''])}
+                                    >
+                                        + Add another option
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="creator-field">
+                            <label>Choose Avatar</label>
+                            <div className="creator-avatar-section">
+                                <div className="avatar-category-tabs">
+                                    {CATEGORIES.map(cat => (
+                                        <button
+                                            key={cat}
+                                            className={`category-tab ${selectedCategory === cat ? 'active' : ''}`}
+                                            onClick={() => setSelectedCategory(cat)}
+                                        >
+                                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="creator-avatar-grid">
+                                    {PREMIUM_AVATARS.filter(a => a.category === selectedCategory).map(avatar => (
+                                        <div
+                                            key={avatar.id}
+                                            className={`creator-avatar-option ${mentorAvatar === avatar.image ? 'selected' : ''}`}
+                                            onClick={() => setMentorAvatar(avatar.image)}
+                                        >
+                                            <img src={avatar.image} alt={avatar.name} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="creator-field">
+                            <label>Visibility</label>
+                            <div className="visibility-toggle">
+                                <button
+                                    className={`vis-btn ${mentorVisibility === 'private' ? 'active' : ''}`}
+                                    onClick={() => setMentorVisibility('private')}
+                                >
+                                    <FaLock size={12} />
+                                    <div>
+                                        <strong>Private</strong>
+                                        <span>Only you can talk to this mentor</span>
+                                    </div>
+                                </button>
+                                <button
+                                    className={`vis-btn ${mentorVisibility === 'public' ? 'active' : ''}`}
+                                    onClick={() => setMentorVisibility('public')}
+                                >
+                                    <FaGlobe size={12} />
+                                    <div>
+                                        <strong>Public</strong>
+                                        <span>Anyone in the community can discover & chat</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button className="creator-submit" onClick={handleCreateMentor}>
+                            <FaPlus size={14} /> {editingMentorId ? 'Save Changes' : 'Create Mentor'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ---- Main Discover View ----
+    return (
+        <div className="discover-container">
+            {/* Header */}
+            <header className="discover-header">
+                <div className="welcome-text">
+                    <p className="welcome-greeting">Welcome back,</p>
+                    <h1 className="welcome-name">{user?.name || 'Explorer'}</h1>
+                </div>
+                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                    <div className="search-bar-container">
+                        <FaSearch className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Search companions..."
+                            className="search-input"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <button className="create-mentor-btn" onClick={() => setIsCreating(true)}>
+                        <FaPlus size={12} /> Create
+                    </button>
+                </div>
+            </header>
+
+            {filtered ? (
+                <section>
+                    <h3 className="section-title">Search Results</h3>
+                    {filtered.length === 0 ? (
+                        <div className="no-results">No companions match your search.</div>
+                    ) : (
+                        <div className="ai-card-scroll">
+                            {filtered.map(ai => <AICard key={ai.id} ai={ai} />)}
+                        </div>
+                    )}
+                </section>
+            ) : (
+                <>
+                    {/* My Mentors */}
+                    {myMentors.length > 0 && (
+                        <section>
+                            <h3 className="section-title">My Mentors</h3>
+                            <div className="ai-card-scroll">
+                                {myMentors.map(ai => <AICard key={ai.id} ai={ai} showDelete />)}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Featured */}
+                    <section>
+                        <h3 className="section-title">Featured</h3>
+                        <div className="ai-card-scroll">
+                            {featuredAIs.map(ai => <AICard key={ai.id} ai={ai} />)}
+                        </div>
+                    </section>
+
+                    {/* Popular */}
+                    <section>
+                        <h3 className="section-title">Popular</h3>
+                        <div className="ai-card-scroll">
+                            {popularAIs.map(ai => <AICard key={ai.id} ai={ai} />)}
+                        </div>
+                    </section>
+                </>
+            )}
+        </div>
+    );
+};
+
+export default Discover;

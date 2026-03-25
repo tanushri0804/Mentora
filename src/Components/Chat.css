@@ -303,10 +303,28 @@
     margin: 0;
 }
 
+.sidebar-interactions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    padding: 0.25rem 0.75rem;
+    background: rgba(42, 157, 143, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(42, 157, 143, 0.2);
+}
+
+.interactions-icon {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
 .sidebar-stats {
     color: #2a9d8f;
     font-size: 0.85rem;
-    font-weight: 600;
     margin: 0;
 }
 

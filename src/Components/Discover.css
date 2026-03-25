@@ -250,6 +250,11 @@
     color: #2a9d8f;
 }
 
+.visibility-badge.official {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
 /* Card Footer */
 .ai-card-footer {
     display: flex;
@@ -434,6 +439,118 @@
     border-color: #2a9d8f;
     transform: scale(0.92);
     box-shadow: 0 0 20px rgba(42, 157, 143, 0.3);
+}
+
+/* Suggestions List */
+.suggestions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.suggestion-input {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.add-suggestion-btn {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    color: #9ca3af;
+    padding: 0.8rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 0.2rem;
+}
+
+.add-suggestion-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+/* Creator Avatar Picker */
+.creator-avatar-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.2rem;
+}
+
+.creator-avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.creator-avatar-option {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    padding: 4px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.creator-avatar-option:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.creator-avatar-option.selected {
+    border-color: #2a9d8f;
+    background: rgba(42, 157, 143, 0.15);
+    box-shadow: 0 0 15px rgba(42, 157, 143, 0.2);
+}
+
+.creator-avatar-option img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Category Tabs (Discover specific) */
+.creator-avatar-section .avatar-category-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+
+.creator-avatar-section .avatar-category-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.creator-avatar-section .category-tab {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.creator-avatar-section .category-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.creator-avatar-section .category-tab.active {
+    background: #2a9d8f;
+    color: white;
+    border-color: #2a9d8f;
+    box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
 }
 
 /* Visibility Toggle */

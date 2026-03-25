@@ -1,206 +1,198 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaComment, FaPlus, FaTimes, FaLock, FaGlobe, FaRobot } from 'react-icons/fa';
+import { FaSearch, FaComment, FaPlus, FaTimes, FaLock, FaGlobe, FaRobot, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import { chatbotService } from '../services/chatbotService';
 import './Discover.css';
 
-import moodAvtar from '../assets/moodAvtar.png';
-import stressAvtar from '../assets/stressAvtar.png';
-import dreamAvtar from '../assets/dreamAvtar.png';
-import anxityAvtar from '../assets/anxityAvtar.png';
-import relationshipAvtar from '../assets/relationshipAvtar.png';
-
-const AVATAR_OPTIONS = [moodAvtar, stressAvtar, dreamAvtar, anxityAvtar, relationshipAvtar];
+// Premium avatars from DiceBear API (only faces)
+const CATEGORIES = ['lorelei', 'adventurer', 'avataaars', 'bottts', 'notionists'];
+const PREMIUM_AVATARS = CATEGORIES.flatMap(cat =>
+    Array.from({ length: 12 }, (_, i) => ({
+        id: `${cat}-${i + 1}`,
+        name: `${cat.charAt(0).toUpperCase() + cat.slice(1)} ${i + 1}`,
+        image: `https://api.dicebear.com/7.x/${cat}/svg?seed=${cat}${i + 1}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`,
+        category: cat
+    }))
+);
 
 const Discover = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [search, setSearch] = useState("");
     const [isCreating, setIsCreating] = useState(false);
-    const [editingMentorId, setEditingMentorId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     // Create mentor form states
     const [mentorName, setMentorName] = useState('');
     const [mentorDesc, setMentorDesc] = useState('');
     const [mentorPersonality, setMentorPersonality] = useState('');
-    const [mentorAvatar, setMentorAvatar] = useState(AVATAR_OPTIONS[0]);
+    const [mentorIntro, setMentorIntro] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
+    const [mentorAvatar, setMentorAvatar] = useState(PREMIUM_AVATARS[0].image);
     const [mentorVisibility, setMentorVisibility] = useState('private'); // 'private' or 'public'
 
-    // User-created mentors
-    const [myMentors, setMyMentors] = useState([]);
+    // Chatbot data from API
+    const [myChatbots, setMyChatbots] = useState([]);
+    const [officialChatbots, setOfficialChatbots] = useState([]);
+    const [publicChatbots, setPublicChatbots] = useState([]);
 
-    const featuredAIs = [
-        {
-            id: "mood-mentor",
-            name: "Mood Mentor",
-            author: "@mentora_official",
-            desc: "Hello, I'm your Mood Mentor. I help you navigate emotions, find balance, and bring clarity to your...",
-            img: moodAvtar,
-            chats: "24.5k"
-        },
-        {
-            id: "stress-buster",
-            name: "Stress Buster",
-            author: "@zen_master",
-            desc: "Hey there! I use quick CBT techniques and talk therapy for immediate stress relief. Let's work through...",
-            img: stressAvtar,
-            chats: "18.2k"
-        },
-        {
-            id: "dream-weaver",
-            name: "Dream Weaver",
-            author: "@sleepy_hollow",
-            desc: "Welcome! I interpret your dreams, explore your subconscious, and help improve your sleep hygiene...",
-            img: dreamAvtar,
-            chats: "12.8k"
+    // Load chatbots from API
+    useEffect(() => {
+        if (user) {
+            loadChatbots();
         }
-    ];
+    }, [user]);
 
-    const popularAIs = [
-        {
-            id: "anxiety-ally",
-            name: "Anxiety Ally",
-            author: "@calm_corner",
-            desc: "I'm here to help you navigate anxious thoughts with gentle, evidence-based guidance and breathing...",
-            img: anxityAvtar,
-            chats: "31.1k"
-        },
-        {
-            id: "relationship-rescuer",
-            name: "Relationship Guide",
-            author: "@heart_talks",
-            desc: "Hello! I provide insights and advice for building healthy boundaries and meaningful connections...",
-            img: relationshipAvtar,
-            chats: "15.6k"
-        },
-        {
-            id: "creative-helper",
-            name: "Creative Spark",
-            author: "@muse_ai",
-            desc: "Let's unblock your mind! I help you find inspiration, explore ideas, and tap into your creative flow...",
-            img: moodAvtar,
-            chats: "9.4k"
-        },
-        {
-            id: "focus-pocus",
-            name: "Focus Master",
-            author: "@productivity_pro",
-            desc: "Ready to get things done? I help you build focus, manage time, and beat mental fatigue with proven...",
-            img: stressAvtar,
-            chats: "22.3k"
+    const loadChatbots = async () => {
+        try {
+            setLoading(true);
+            const [allBots, myBots] = await Promise.all([
+                chatbotService.getChatbots(),
+                chatbotService.getUserChatbots()
+            ]);
+
+            setMyChatbots(myBots.data || []);
+
+            // Separate official and public chatbots
+            const official = allBots.data?.filter(bot => bot.isOfficial) || [];
+            const publicBots = allBots.data?.filter(bot => bot.isPublic && !bot.isOfficial) || [];
+
+            setOfficialChatbots(official);
+            setPublicChatbots(publicBots);
+        } catch (error) {
+            console.error('Failed to load chatbots:', error);
+            setError('Failed to load chatbots. Please try again.');
+        } finally {
+            setLoading(false);
         }
-    ];
-
-    // Combine public custom mentors into the all list
-    const publicCustom = myMentors.filter(m => m.visibility === 'public');
-    const allAIs = [...featuredAIs, ...popularAIs, ...publicCustom];
-
-    const filtered = search.trim()
-        ? allAIs.filter(ai =>
-            ai.name.toLowerCase().includes(search.toLowerCase()) ||
-            ai.desc.toLowerCase().includes(search.toLowerCase())
-        )
-        : null;
-
-    const handleSelectAI = (id) => {
-        navigate(`/chat/chatbot/${id}`);
     };
 
-    const resetForm = () => {
-        setMentorName('');
-        setMentorDesc('');
-        setMentorPersonality('');
-        setMentorAvatar(AVATAR_OPTIONS[0]);
-        setMentorVisibility('private');
-        setEditingMentorId(null);
-    };
-
-    const startEditMentor = (mentor) => {
-        setMentorName(mentor.name);
-        setMentorDesc(mentor.desc);
-        setMentorPersonality(mentor.personality || '');
-        setMentorAvatar(mentor.img);
-        setMentorVisibility(mentor.visibility);
-        setEditingMentorId(mentor.id);
-        setIsCreating(true);
-    };
-
-    const handleCreateMentor = () => {
+    // Create new chatbot
+    const handleCreateChatbot = async () => {
         if (!mentorName.trim() || !mentorDesc.trim()) {
-            alert("Please provide a name and description for your mentor.");
+            setError('Name and description are required');
             return;
         }
 
-        if (editingMentorId) {
-            // Update existing mentor
-            setMyMentors(myMentors.map(m => m.id === editingMentorId ? {
-                ...m,
-                name: mentorName.trim(),
-                desc: mentorDesc.trim(),
-                personality: mentorPersonality.trim(),
-                img: mentorAvatar,
-                visibility: mentorVisibility
-            } : m));
-        } else {
-            // Create new mentor
-            const newMentor = {
-                id: `custom-${Date.now()}`,
-                name: mentorName.trim(),
-                author: "@you",
-                desc: mentorDesc.trim(),
-                personality: mentorPersonality.trim(),
-                img: mentorAvatar,
-                chats: "0",
-                visibility: mentorVisibility,
-                isCustom: true,
-                createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        try {
+            setLoading(true);
+            const systemPrompt = `You are ${mentorName}, ${mentorPersonality}. Always respond with empathy and helpful guidance.`;
+
+            const chatbotData = {
+                name: mentorName,
+                description: mentorDesc,
+                avatar: mentorAvatar,
+                category: selectedCategory,
+                isPublic: mentorVisibility === 'public',
+                systemPrompt: systemPrompt,
+                intro: mentorIntro || `Hello! I'm ${mentorName}. How can I help you today?`
             };
-            setMyMentors([newMentor, ...myMentors]);
-        }
 
-        setIsCreating(false);
-        resetForm();
+            await chatbotService.createChatbot(chatbotData);
+            
+            // Reset form and reload
+            resetCreateForm();
+            setIsCreating(false);
+            loadChatbots();
+            setError('');
+        } catch (error) {
+            console.error('Failed to create chatbot:', error);
+            setError(error.message || 'Failed to create chatbot. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleDeleteMentor = (id) => {
-        if (window.confirm("Delete this mentor permanently?")) {
-            setMyMentors(myMentors.filter(m => m.id !== id));
+    // Delete chatbot
+    const handleDeleteChatbot = async (chatbotId) => {
+        if (!window.confirm('Are you sure you want to delete this chatbot?')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await chatbotService.deleteChatbot(chatbotId);
+            loadChatbots();
+            setError('');
+        } catch (error) {
+            console.error('Failed to delete chatbot:', error);
+            setError(error.message || 'Failed to delete chatbot. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const AICard = ({ ai, showDelete }) => (
-        <div className="ai-card" onClick={() => handleSelectAI(ai.id)}>
-            <img src={ai.img} alt={ai.name} className="ai-card-avatar" />
+    const resetCreateForm = () => {
+        setMentorName('');
+        setMentorDesc('');
+        setMentorPersonality('');
+        setMentorIntro('');
+        setSelectedCategory(CATEGORIES[0]);
+        setMentorAvatar(PREMIUM_AVATARS[0].image);
+        setMentorVisibility('private');
+    };
+
+    const handleChatWithBot = (chatbotId) => {
+        navigate(`/chat/chatbot/${chatbotId}`);
+    };
+
+    // Filter chatbots based on search
+    const allBots = [...officialChatbots, ...publicChatbots, ...myChatbots];
+    const filtered = search.trim()
+        ? allBots.filter(bot =>
+            bot.name.toLowerCase().includes(search.toLowerCase()) ||
+            bot.description.toLowerCase().includes(search.toLowerCase())
+        )
+        : null;
+
+    // AICard component
+    const AICard = ({ bot, showDelete = false }) => (
+        <div 
+            className="ai-card" 
+            onClick={() => handleChatWithBot(bot.id)}
+            style={{ cursor: 'pointer' }}
+        >
+            <img 
+                src={bot.avatar || '/assets/default-avatar.png'} 
+                alt={bot.name}
+                className="ai-card-avatar"
+                onError={(e) => { e.target.src = '/assets/default-avatar.png'; }}
+            />
             <div className="ai-card-body">
                 <div className="ai-card-top-row">
-                    <h4 className="ai-card-name">{ai.name}</h4>
-                    {ai.isCustom && (
-                        <span className={`visibility-badge ${ai.visibility}`}>
-                            {ai.visibility === 'private' ? <FaLock size={9} /> : <FaGlobe size={9} />}
-                            {ai.visibility === 'private' ? 'Private' : 'Public'}
+                    <h4 className="ai-card-name">{bot.name}</h4>
+                    {bot.isOfficial && (
+                        <span className="visibility-badge official">
+                            <FaRobot size={9} /> Official
+                        </span>
+                    )}
+                    {!bot.isPublic && !bot.isOfficial && (
+                        <span className="visibility-badge private">
+                            <FaLock size={9} /> Private
                         </span>
                     )}
                 </div>
-                <span className="ai-card-author">By {ai.author}</span>
-                <p className="ai-card-desc">{ai.desc}</p>
+                <span className="ai-card-author">
+                    By {bot.isOfficial ? '@mentora_official' : 'Custom Creator'}
+                </span>
+                <p className="ai-card-desc">{bot.description}</p>
                 <div className="ai-card-footer">
                     <div className="ai-card-stats">
                         <FaComment className="stats-icon" />
-                        <span>{ai.chats}</span>
+                        <span>{bot.interactions || 0}</span>
                     </div>
-                    {showDelete && (
+                    {showDelete && !bot.isOfficial && (
                         <div className="card-action-btns">
                             <button
-                                className="card-edit-btn"
-                                onClick={(e) => { e.stopPropagation(); startEditMentor(ai); }}
-                            >
-                                Edit
-                            </button>
-                            <button
                                 className="card-delete-btn"
-                                onClick={(e) => { e.stopPropagation(); handleDeleteMentor(ai.id); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteChatbot(bot.id);
+                                }}
                             >
-                                Delete
+                                <FaTrash size={12} />
                             </button>
                         </div>
                     )}
@@ -214,14 +206,14 @@ const Discover = () => {
         return (
             <div className="discover-container">
                 <div className="creator-page">
-                    <button className="creator-back-btn" onClick={() => { setIsCreating(false); resetForm(); }}>
+                    <button className="creator-back-btn" onClick={() => { setIsCreating(false); resetCreateForm(); }}>
                         <FaTimes /> Cancel
                     </button>
 
                     <div className="creator-header">
                         <FaRobot className="creator-icon" />
-                        <h2>{editingMentorId ? 'Edit Your Mentor' : 'Create Your AI Mentor'}</h2>
-                        <p>{editingMentorId ? 'Update your mentor\'s details below.' : 'Build a personalized mentor that understands you. Choose to keep it private or share with the community.'}</p>
+                        <h2>Create Your AI Mentor</h2>
+                        <p>Build a personalized mentor that understands you. Choose to keep it private or share with the community.</p>
                     </div>
 
                     <div className="creator-form">
@@ -237,9 +229,9 @@ const Discover = () => {
                         </div>
 
                         <div className="creator-field">
-                            <label>Short Description</label>
+                            <label>Description</label>
                             <textarea
-                                placeholder="What does this mentor do? e.g. A gentle guide who helps me process daily anxiety..."
+                                placeholder="A brief summary of what this mentor does..."
                                 value={mentorDesc}
                                 onChange={e => setMentorDesc(e.target.value)}
                                 className="creator-input creator-textarea-sm"
@@ -247,9 +239,9 @@ const Discover = () => {
                         </div>
 
                         <div className="creator-field">
-                            <label>Personality & Instructions <span style={{ color: '#6b7280', fontWeight: 400 }}>(Optional)</span></label>
+                            <label>Behavior Details (System Prompt)</label>
                             <textarea
-                                placeholder="How should this mentor talk? e.g. Be warm and empathetic, use simple language, always ask follow-up questions..."
+                                placeholder="How exactly should this ai behave? e.g. You are a professional therapist who uses humor..."
                                 value={mentorPersonality}
                                 onChange={e => setMentorPersonality(e.target.value)}
                                 className="creator-input creator-textarea"
@@ -257,17 +249,40 @@ const Discover = () => {
                         </div>
 
                         <div className="creator-field">
+                            <label>Intro Message</label>
+                            <textarea
+                                placeholder="What should the mentor say first? e.g. Hello! I'm Shinee. How are you feeling today?"
+                                value={mentorIntro}
+                                onChange={e => setMentorIntro(e.target.value)}
+                                className="creator-input creator-textarea-sm"
+                            />
+                        </div>
+
+                        <div className="creator-field">
                             <label>Choose Avatar</label>
-                            <div className="avatar-picker">
-                                {AVATAR_OPTIONS.map((avatar, i) => (
-                                    <img
-                                        key={i}
-                                        src={avatar}
-                                        alt={`Avatar ${i + 1}`}
-                                        className={`avatar-option ${mentorAvatar === avatar ? 'active' : ''}`}
-                                        onClick={() => setMentorAvatar(avatar)}
-                                    />
-                                ))}
+                            <div className="creator-avatar-section">
+                                <div className="avatar-category-tabs">
+                                    {CATEGORIES.map(cat => (
+                                        <button
+                                            key={cat}
+                                            className={`category-tab ${selectedCategory === cat ? 'active' : ''}`}
+                                            onClick={() => setSelectedCategory(cat)}
+                                        >
+                                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="creator-avatar-grid">
+                                    {PREMIUM_AVATARS.filter(a => a.category === selectedCategory).map(avatar => (
+                                        <div
+                                            key={avatar.id}
+                                            className={`creator-avatar-option ${mentorAvatar === avatar.image ? 'selected' : ''}`}
+                                            onClick={() => setMentorAvatar(avatar.image)}
+                                        >
+                                            <img src={avatar.image} alt={avatar.name} />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
@@ -297,8 +312,8 @@ const Discover = () => {
                             </div>
                         </div>
 
-                        <button className="creator-submit" onClick={handleCreateMentor}>
-                            <FaPlus size={14} /> {editingMentorId ? 'Save Changes' : 'Create Mentor'}
+                        <button className="creator-submit" onClick={handleCreateChatbot}>
+                            <FaPlus size={14} /> Create Chatbot
                         </button>
                     </div>
                 </div>
@@ -309,6 +324,33 @@ const Discover = () => {
     // ---- Main Discover View ----
     return (
         <div className="discover-container">
+            {/* Error Display */}
+            {error && (
+                <div className="error-message" style={{
+                    backgroundColor: '#ff4757',
+                    color: 'white',
+                    padding: '10px',
+                    margin: '10px',
+                    borderRadius: '5px',
+                    textAlign: 'center'
+                }}>
+                    {error}
+                    <button 
+                        onClick={() => setError('')}
+                        style={{ marginLeft: '10px', background: 'none', border: 'none', color: 'white' }}
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
+
+            {/* Loading Display */}
+            {loading && (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                    Loading chatbots...
+                </div>
+            )}
+
             {/* Header */}
             <header className="discover-header">
                 <div className="welcome-text">
@@ -339,37 +381,41 @@ const Discover = () => {
                         <div className="no-results">No companions match your search.</div>
                     ) : (
                         <div className="ai-card-scroll">
-                            {filtered.map(ai => <AICard key={ai.id} ai={ai} />)}
+                            {filtered.map(bot => <AICard key={bot.id} bot={bot} />)}
                         </div>
                     )}
                 </section>
             ) : (
                 <>
-                    {/* My Mentors */}
-                    {myMentors.length > 0 && (
+                    {/* My Chatbots */}
+                    {myChatbots.length > 0 && (
                         <section>
-                            <h3 className="section-title">My Mentors</h3>
+                            <h3 className="section-title">My Chatbots</h3>
                             <div className="ai-card-scroll">
-                                {myMentors.map(ai => <AICard key={ai.id} ai={ai} showDelete />)}
+                                {myChatbots.map(bot => <AICard key={bot.id} bot={bot} showDelete />)}
                             </div>
                         </section>
                     )}
 
-                    {/* Featured */}
-                    <section>
-                        <h3 className="section-title">Featured</h3>
-                        <div className="ai-card-scroll">
-                            {featuredAIs.map(ai => <AICard key={ai.id} ai={ai} />)}
-                        </div>
-                    </section>
+                    {/* Official Mentors */}
+                    {officialChatbots.length > 0 && (
+                        <section>
+                            <h3 className="section-title">Official Mentors</h3>
+                            <div className="ai-card-scroll">
+                                {officialChatbots.map(bot => <AICard key={bot.id} bot={bot} />)}
+                            </div>
+                        </section>
+                    )}
 
-                    {/* Popular */}
-                    <section>
-                        <h3 className="section-title">Popular</h3>
-                        <div className="ai-card-scroll">
-                            {popularAIs.map(ai => <AICard key={ai.id} ai={ai} />)}
-                        </div>
-                    </section>
+                    {/* Public Chatbots */}
+                    {publicChatbots.length > 0 && (
+                        <section>
+                            <h3 className="section-title">Community Chatbots</h3>
+                            <div className="ai-card-scroll">
+                                {publicChatbots.map(bot => <AICard key={bot.id} bot={bot} />)}
+                            </div>
+                        </section>
+                    )}
                 </>
             )}
         </div>

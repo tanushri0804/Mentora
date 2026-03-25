@@ -43,6 +43,7 @@ const ChatInterfaceWithTabs = () => (
         <Route path="discover" element={<Discover />} />
         <Route path="chats" element={<ChatList />} />
         <Route path="chatbot/:aiId" element={<ChatInterface />} />
+        <Route path=":aiId" element={<ChatInterface />} />
         <Route path="mood-tracker" element={<MoodTracker />} />
         <Route path="self-care" element={<SelfCareResources />} />
         <Route path="story" element={<Storyteller />} />
