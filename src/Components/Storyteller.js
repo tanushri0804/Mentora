@@ -75,6 +75,7 @@ const MAX_PAGES = 20;
 
 const Storyteller = () => {
   const [stories, setStories] = useState([]);
+  const [userComments, setUserComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
@@ -266,6 +267,60 @@ const Storyteller = () => {
     }
   };
 
+  const fetchUserComments = async () => {
+    try {
+      const token = localStorage.getItem('mentora_token');
+      
+      const response = await fetch('http://localhost:5000/api/stories/my-comments', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Transform backend data to match frontend format
+          const formattedComments = data.data.map(comment => ({
+            id: comment.id,
+            text: comment.content,
+            storyId: comment.storyId,
+            storyTitle: comment.story.title,
+            storyAuthor: comment.story.user.username || '@user',
+            date: new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          }));
+          return formattedComments;
+        }
+      }
+      throw new Error('Failed to fetch user comments');
+    } catch (error) {
+      console.error('Fetch user comments error:', error);
+      throw error;
+    }
+  };
+
+  const deleteComment = async (commentId) => {
+    try {
+      const token = localStorage.getItem('mentora_token');
+      
+      const response = await fetch(`http://localhost:5000/api/stories/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.success;
+      }
+      throw new Error('Failed to delete comment');
+    } catch (error) {
+      console.error('Delete comment error:', error);
+      throw error;
+    }
+  };
+
   // Load stories on component mount and when filter changes
   useEffect(() => {
     if (currentTab === 'community') {
@@ -278,6 +333,20 @@ const Storyteller = () => {
     if (currentTab === 'my-stories') {
       fetchUserStories().then(userStories => {
         setStories(userStories);
+        setLoading(false);
+      });
+    }
+  }, [currentTab]);
+
+  // Load user comments when switching to my-comments tab
+  useEffect(() => {
+    if (currentTab === 'my-comments') {
+      fetchUserComments().then(comments => {
+        setUserComments(comments);
+        setLoading(false);
+      }).catch(error => {
+        console.error('Failed to load user comments:', error);
+        setUserComments([]);
         setLoading(false);
       });
     }
@@ -454,6 +523,36 @@ const Storyteller = () => {
     } catch (error) {
       alert('Failed to add comment. Please try again.');
       console.error('Add comment error:', error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      try {
+        await deleteComment(commentId);
+        
+        // Remove comment from user comments list
+        setUserComments(userComments.filter(c => c.id !== commentId));
+        
+        // Also remove from current story if it's being displayed
+        if (readingStory && readingStory.comments) {
+          const updatedStory = {
+            ...readingStory,
+            comments: readingStory.comments.filter(c => c.id !== commentId)
+          };
+          setReadingStory(updatedStory);
+          
+          // Update stories array too
+          const updatedStories = stories.map(s => 
+            s.id === readingStory.id ? updatedStory : s
+          );
+          setStories(updatedStories);
+        }
+        
+      } catch (error) {
+        alert('Failed to delete comment. Please try again.');
+        console.error('Delete comment error:', error);
+      }
     }
   };
 
@@ -706,20 +805,67 @@ const Storyteller = () => {
       {/* Header */}
       <div className="page-header fade-in-up">
         <div>
-          <h1>{currentTab === 'community' ? 'Community Stories' : 'My Diary'}</h1>
-          <p>{currentTab === 'community' ? 'Read, share, and connect feeling to feeling.' : 'Your personal space to manage stories & reflections.'}</p>
+          <h1>
+            {currentTab === 'community' ? 'Community Stories' : 
+             currentTab === 'my-stories' ? 'My Diary' : 'My Comments'}
+          </h1>
+          <p>
+            {currentTab === 'community' ? 'Read, share, and connect feeling to feeling.' : 
+             currentTab === 'my-stories' ? 'Your personal space to manage stories & reflections.' : 
+             'See all your comments across stories and manage them.'}
+          </p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button
-            className="create-story-btn"
-            style={{ background: 'transparent', border: '1px solid var(--glass-border)' }}
-            onClick={() => setCurrentTab(currentTab === 'community' ? 'my-stories' : 'community')}
-          >
-            {currentTab === 'community' ? 'My Diary' : 'Back to Community'}
-          </button>
-          <button className="create-story-btn" onClick={startWriting}>
-            <FaPen size={14} /> Write Story
-          </button>
+          {currentTab === 'community' && (
+            <button
+              className="create-story-btn"
+              style={{ background: 'transparent', border: '1px solid var(--glass-border)' }}
+              onClick={() => setCurrentTab('my-stories')}
+            >
+              My Diary
+            </button>
+          )}
+          {currentTab === 'my-stories' && (
+            <>
+              <button
+                className="create-story-btn"
+                style={{ background: 'transparent', border: '1px solid var(--glass-border)' }}
+                onClick={() => setCurrentTab('my-comments')}
+              >
+                My Comments
+              </button>
+              <button
+                className="create-story-btn"
+                style={{ background: 'transparent', border: '1px solid var(--glass-border)' }}
+                onClick={() => setCurrentTab('community')}
+              >
+                Back to Community
+              </button>
+            </>
+          )}
+          {currentTab === 'my-comments' && (
+            <>
+              <button
+                className="create-story-btn"
+                style={{ background: 'transparent', border: '1px solid var(--glass-border)' }}
+                onClick={() => setCurrentTab('my-stories')}
+              >
+                Back to My Diary
+              </button>
+              <button
+                className="create-story-btn"
+                style={{ background: 'transparent', border: '1px solid var(--glass-border)' }}
+                onClick={() => setCurrentTab('community')}
+              >
+                Browse Community
+              </button>
+            </>
+          )}
+          {(currentTab === 'community' || currentTab === 'my-stories') && (
+            <button className="create-story-btn" onClick={startWriting}>
+              <FaPen size={14} /> Write Story
+            </button>
+          )}
         </div>
       </div>
 
@@ -827,45 +973,43 @@ const Storyteller = () => {
 
           {currentTab === 'my-comments' && (
             <div className="my-comments-list fade-in-up" style={{ animationDelay: '0.2s' }}>
-              {(() => {
-                const myComments = [];
-                stories.forEach(story => {
-                  if (story.comments) {
-                    story.comments.forEach(comment => {
-                      if (comment.author === '@you') {
-                        myComments.push({ story, comment });
-                      }
-                    });
-                  }
-                });
-
-                if (myComments.length === 0) {
-                  return (
-                    <div className="empty-state">
-                      <FaCommentDots className="empty-state-icon" />
-                      <h3>No comments yet</h3>
-                      <p>You haven't shared your thoughts on any story yet. Read a story from the community and leave a kind or supportive message!</p>
-                      <button className="create-story-btn" onClick={() => setCurrentTab('community')}>
-                        Browse Community Stories
-                      </button>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {myComments.map(({ story, comment }, idx) => (
-                      <div key={idx} className="comment-item" style={{ cursor: 'pointer' }} onClick={() => setReadingStory(story)}>
-                        <div className="comment-header">
-                          <strong>Commented on: {story.title}</strong>
-                          <span className="comment-date">{comment.date}</span>
+              {userComments.length === 0 ? (
+                <div className="empty-state">
+                  <FaCommentDots className="empty-state-icon" />
+                  <h3>No comments yet</h3>
+                  <p>You haven't shared your thoughts on any story yet. Read a story from the community and leave a kind or supportive message!</p>
+                  <button className="create-story-btn" onClick={() => setCurrentTab('community')}>
+                    Browse Community Stories
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {userComments.map((comment, idx) => (
+                    <div key={comment.id} className="comment-item" style={{ cursor: 'pointer' }}>
+                      <div className="comment-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div onClick={() => setReadingStory({ id: comment.storyId, title: comment.storyTitle, author: comment.storyAuthor })}>
+                          <strong>Commented on: {comment.storyTitle}</strong>
+                          <span className="comment-date" style={{ marginLeft: '1rem' }}>{comment.date}</span>
                         </div>
-                        <p>{comment.text}</p>
+                        <button 
+                          className="action-btn delete-btn" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteComment(comment.id);
+                          }}
+                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                        >
+                          <FaTimes size={12} />
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                );
-              })()}
+                      <p>{comment.text}</p>
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', opacity: 0.7 }}>
+                        Story by {comment.storyAuthor}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </>
