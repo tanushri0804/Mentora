@@ -125,7 +125,12 @@ const Storyteller = () => {
             cover: story.cover,
             description: story.description,
             pages: story.pages,
-            comments: story.comments || [],
+            comments: (story.comments || []).map(comment => ({
+              id: comment.id,
+              author: comment.user.username || '@user',
+              text: comment.content,
+              date: new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            })),
             date: new Date(story.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           }));
           setStories(formattedStories);
@@ -165,7 +170,12 @@ const Storyteller = () => {
             cover: story.cover,
             description: story.description,
             pages: story.pages,
-            comments: [], // Will be loaded separately
+            comments: (story.comments || []).map(comment => ({
+              id: comment.id,
+              author: comment.user.username || '@user',
+              text: comment.content,
+              date: new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            })),
             date: new Date(story.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           }));
           return formattedStories;
@@ -418,6 +428,7 @@ const Storyteller = () => {
         date: new Date(savedComment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       };
 
+      // Update the stories array with the new comment
       const updatedStories = stories.map(s => {
         if (s.id === readingStory.id) {
           const updatedStory = { ...s, comments: [...(s.comments || []), formattedComment] };
@@ -429,6 +440,17 @@ const Storyteller = () => {
 
       setStories(updatedStories);
       setNewComment('');
+      
+      // Refresh the currently reading story to get updated comments from backend
+      if (readingStory && readingStory.id === updatedStories.find(s => s.id === readingStory.id)?.id) {
+        setTimeout(() => {
+          const refreshStory = updatedStories.find(s => s.id === readingStory.id);
+          if (refreshStory) {
+            setReadingStory(refreshStory);
+          }
+        }, 500);
+      }
+      
     } catch (error) {
       alert('Failed to add comment. Please try again.');
       console.error('Add comment error:', error);

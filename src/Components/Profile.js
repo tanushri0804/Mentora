@@ -107,7 +107,7 @@ const Profile = () => {
     const loadUserProfile = async () => {
         try {
             console.log('Loading user profile...');
-            const response = await fetch('http://localhost:5000/api/auth/profile', {
+            const response = await fetch('http://localhost:5000/api/profile', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -115,8 +115,8 @@ const Profile = () => {
             const data = await response.json();
             console.log('Profile response:', data);
 
-            if (data.success && data.data.profile) {
-                const profile = data.data.profile;
+            if (data.success && data.data) {
+                const profile = data.data;
                 console.log('Setting profile data:', profile);
                 setProfileData({
                     displayName: profile.displayName || user?.name || '',
@@ -125,8 +125,9 @@ const Profile = () => {
                     bio: profile.bio || '',
                     location: profile.location || '',
                     website: profile.website || '',
-                    interests: profile.interests || [],
-                    moodColor: profile.moodColor || 'blue'
+                    interests: profile.interests ? (typeof profile.interests === 'string' ? JSON.parse(profile.interests) : profile.interests) : [],
+                    moodColor: profile.moodColor || 'blue',
+                    privacy: profile.privacy ? (typeof profile.privacy === 'string' ? JSON.parse(profile.privacy) : profile.privacy) : {}
                 });
             } else if (data.success && !data.data.profile) {
                 // No profile exists, set defaults
