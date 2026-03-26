@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPen, FaTimes, FaGlobe, FaChevronLeft, FaChevronRight, FaPlus, FaBookOpen, FaCommentDots } from 'react-icons/fa';
 import './Storyteller.css';
 
@@ -74,7 +74,9 @@ const DEFAULT_STORIES = [
 const MAX_PAGES = 20;
 
 const Storyteller = () => {
-  const [stories, setStories] = useState(DEFAULT_STORIES);
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [currentTab, setCurrentTab] = useState('community'); // 'community', 'my-stories', 'my-comments'
 
@@ -93,6 +95,183 @@ const Storyteller = () => {
   const [writerPageIndex, setWriterPageIndex] = useState(0);
   const [newEmotion, setNewEmotion] = useState('neutral');
   const [newCover, setNewCover] = useState(COVER_IMAGES[0]);
+
+  // API functions
+  const fetchStories = async (emotion = null) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('mentora_token');
+      let url = 'http://localhost:5000/api/stories/public';
+      
+      if (emotion && emotion !== 'all') {
+        url += `?emotion=${emotion}`;
+      }
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Transform backend data to match frontend format
+          const formattedStories = data.data.map(story => ({
+            id: story.id,
+            title: story.title,
+            author: story.user.username || '@user',
+            emotion: story.emotion,
+            cover: story.cover,
+            description: story.description,
+            pages: story.pages,
+            comments: story.comments || [],
+            date: new Date(story.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          }));
+          setStories(formattedStories);
+        }
+      } else {
+        throw new Error('Failed to fetch stories');
+      }
+    } catch (error) {
+      console.error('Fetch stories error:', error);
+      setError('Failed to load stories');
+      // Fallback to default stories
+      setStories(DEFAULT_STORIES);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserStories = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('mentora_token');
+      
+      const response = await fetch('http://localhost:5000/api/stories/my-stories', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const formattedStories = data.data.map(story => ({
+            id: story.id,
+            title: story.title,
+            author: '@you',
+            emotion: story.emotion,
+            cover: story.cover,
+            description: story.description,
+            pages: story.pages,
+            comments: [], // Will be loaded separately
+            date: new Date(story.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          }));
+          return formattedStories;
+        }
+      }
+    } catch (error) {
+      console.error('Fetch user stories error:', error);
+    }
+    return [];
+  };
+
+  const saveStory = async (storyData) => {
+    try {
+      const token = localStorage.getItem('mentora_token');
+      const url = editStoryId 
+        ? `http://localhost:5000/api/stories/${editStoryId}`
+        : 'http://localhost:5000/api/stories';
+      
+      const method = editStoryId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(storyData)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          return data.data;
+        }
+      }
+      throw new Error('Failed to save story');
+    } catch (error) {
+      console.error('Save story error:', error);
+      throw error;
+    }
+  };
+
+  const deleteStory = async (storyId) => {
+    try {
+      const token = localStorage.getItem('mentora_token');
+      
+      const response = await fetch(`http://localhost:5000/api/stories/${storyId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.success;
+      }
+      throw new Error('Failed to delete story');
+    } catch (error) {
+      console.error('Delete story error:', error);
+      throw error;
+    }
+  };
+
+  const addComment = async (storyId, content) => {
+    try {
+      const token = localStorage.getItem('mentora_token');
+      
+      const response = await fetch(`http://localhost:5000/api/stories/${storyId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          return data.data;
+        }
+      }
+      throw new Error('Failed to add comment');
+    } catch (error) {
+      console.error('Add comment error:', error);
+      throw error;
+    }
+  };
+
+  // Load stories on component mount and when filter changes
+  useEffect(() => {
+    if (currentTab === 'community') {
+      fetchStories(activeFilter);
+    }
+  }, [currentTab, activeFilter]);
+
+  // Load user stories when switching to my-stories tab
+  useEffect(() => {
+    if (currentTab === 'my-stories') {
+      fetchUserStories().then(userStories => {
+        setStories(userStories);
+        setLoading(false);
+      });
+    }
+  }, [currentTab]);
 
   const filteredStories = activeFilter === 'all'
     ? stories
@@ -124,11 +303,17 @@ const Storyteller = () => {
     setReadingStory(null);
   };
 
-  const handleDeleteStory = (id) => {
+  const handleDeleteStory = async (id) => {
     if (window.confirm("Are you sure you want to delete this story completely?")) {
-      setStories(stories.filter(s => s.id !== id));
-      if (readingStory && readingStory.id === id) setReadingStory(null);
-      if (editStoryId === id) setIsWriting(false);
+      try {
+        await deleteStory(id);
+        setStories(stories.filter(s => s.id !== id));
+        if (readingStory && readingStory.id === id) setReadingStory(null);
+        if (editStoryId === id) setIsWriting(false);
+      } catch (error) {
+        alert('Failed to delete story. Please try again.');
+        console.error('Delete error:', error);
+      }
     }
   };
 
@@ -155,7 +340,7 @@ const Storyteller = () => {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     // Filter out completely empty pages
     const cleanPages = pages.map(p => p.trim()).filter(p => p.length > 0);
 
@@ -164,46 +349,54 @@ const Storyteller = () => {
       return;
     }
 
-    if (editStoryId) {
-      const updatedStories = stories.map(s => {
-        if (s.id === editStoryId) {
-          return {
-            ...s,
-            title: newTitle,
-            emotion: newEmotion,
-            cover: newCover,
-            description: newDescription.trim(),
-            pages: cleanPages
-          };
-        }
-        return s;
-      });
-      setStories(updatedStories);
-    } else {
-      const newStory = {
-        id: Date.now(),
-        title: newTitle,
-        author: '@you',
+    try {
+      const storyData = {
+        title: newTitle.trim(),
+        description: newDescription.trim(),
         emotion: newEmotion,
         cover: newCover,
-        description: newDescription.trim(),
         pages: cleanPages,
-        comments: [],
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        isPublic: true
       };
-      setStories([newStory, ...stories]);
+
+      const savedStory = await saveStory(storyData);
+      
+      // Transform backend response to frontend format
+      const formattedStory = {
+        id: savedStory.id,
+        title: savedStory.title,
+        author: editStoryId ? '@you' : (savedStory.user?.username || '@you'),
+        emotion: savedStory.emotion,
+        cover: savedStory.cover,
+        description: savedStory.description,
+        pages: savedStory.pages,
+        comments: [],
+        date: new Date(savedStory.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      };
+
+      if (editStoryId) {
+        // Update existing story in local state
+        setStories(stories.map(s => s.id === editStoryId ? formattedStory : s));
+      } else {
+        // Add new story to local state
+        setStories([formattedStory, ...stories]);
+      }
+
+      setIsWriting(false);
+      setEditStoryId(null);
+
+      // Reset form
+      setNewTitle('');
+      setNewDescription('');
+      setPages(['']);
+      setWriterPageIndex(0);
+      setNewEmotion('neutral');
+      setNewCover(COVER_IMAGES[0]);
+
+    } catch (error) {
+      alert('Failed to save story. Please try again.');
+      console.error('Publish error:', error);
     }
-
-    setIsWriting(false);
-    setEditStoryId(null);
-
-    // Reset form
-    setNewTitle('');
-    setNewDescription('');
-    setPages(['']);
-    setWriterPageIndex(0);
-    setNewEmotion('neutral');
-    setNewCover(COVER_IMAGES[0]);
   };
 
   const closeReader = () => {
@@ -211,26 +404,35 @@ const Storyteller = () => {
     setReaderPageIndex(0);
   }
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
-    const updatedStories = stories.map(s => {
-      if (s.id === readingStory.id) {
-        const comment = {
-          id: Date.now(),
-          author: '@you',
-          text: newComment.trim(),
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        };
-        const updatedStory = { ...s, comments: [...(s.comments || []), comment] };
-        setReadingStory(updatedStory); // Update currently reading story too
-        return updatedStory;
-      }
-      return s;
-    });
+    try {
+      const savedComment = await addComment(readingStory.id, newComment.trim());
+      
+      // Transform backend response to frontend format
+      const formattedComment = {
+        id: savedComment.id,
+        author: savedComment.user.username || '@you',
+        text: savedComment.content,
+        date: new Date(savedComment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      };
 
-    setStories(updatedStories);
-    setNewComment('');
+      const updatedStories = stories.map(s => {
+        if (s.id === readingStory.id) {
+          const updatedStory = { ...s, comments: [...(s.comments || []), formattedComment] };
+          setReadingStory(updatedStory); // Update currently reading story too
+          return updatedStory;
+        }
+        return s;
+      });
+
+      setStories(updatedStories);
+      setNewComment('');
+    } catch (error) {
+      alert('Failed to add comment. Please try again.');
+      console.error('Add comment error:', error);
+    }
   };
 
   if (readingStory) {
