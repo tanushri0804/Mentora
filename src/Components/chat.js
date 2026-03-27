@@ -29,6 +29,7 @@ const Chat = () => {
   const [currentChatbot, setCurrentChatbot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [isCustomChatbot, setIsCustomChatbot] = useState(false);
 
   // Check if this is a custom chatbot (chatbot/ID) or default mentor (mentor/ID)
@@ -135,6 +136,10 @@ const Chat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [chatHistory]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [isTyping]);
 
   useEffect(() => {
     if (aiId && !isChatbotRoute) {
@@ -291,6 +296,9 @@ const Chat = () => {
     const message = userInput;
     setUserInput("");
     
+    // Show typing indicator
+    setIsTyping(true);
+    
     try {
       const response = await fetch('http://localhost:5000/api/chat/message', {
         method: 'POST',
@@ -307,6 +315,9 @@ const Chat = () => {
       });
 
       const data = await response.json();
+      
+      // Hide typing indicator
+      setIsTyping(false);
       
       if (data.success) {
         setChatHistory([...currentChat, { sender: "bot", text: data.reply }]);
@@ -330,6 +341,7 @@ const Chat = () => {
       }
     } catch (error) {
       console.error('Chat API Error:', error);
+      setIsTyping(false);
       setChatHistory([...currentChat, { 
         sender: "bot", 
         text: "I'm having trouble connecting right now. Please check your connection and try again." 
@@ -452,6 +464,18 @@ const Chat = () => {
             {msg.text}
           </div>
         ))}
+        
+        {/* Typing Indicator */}
+        {isTyping && (
+          <div className="message-bubble bot-bubble typing-indicator">
+            <div className="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
 
@@ -462,10 +486,11 @@ const Chat = () => {
           className="chat-input-field"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleUserInput()}
-          placeholder={`Talk to ${selectedMentor}...`}
+          onKeyPress={(e) => e.key === 'Enter' && !isTyping && handleUserInput()}
+          placeholder={isTyping ? `${selectedMentor} is typing...` : `Talk to ${selectedMentor}...`}
+          disabled={isTyping}
         />
-        <button className="send-btn-icon" onClick={handleUserInput}>
+        <button className="send-btn-icon" onClick={!isTyping && handleUserInput} disabled={isTyping}>
           <FaPaperPlane />
         </button>
       </div>
