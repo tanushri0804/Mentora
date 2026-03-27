@@ -67,6 +67,13 @@ export const chatbotService = {
     return apiCall(`/chatbots/${id}`, {
       method: 'DELETE'
     });
+  },
+
+  // Clear chat history for a specific chatbot
+  clearChatHistory: async (chatbotId) => {
+    return apiCall(`/chat/clear/${chatbotId}`, {
+      method: 'DELETE'
+    });
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { FaPaperPlane, FaEllipsisH, FaVolumeUp, FaPlus, FaHistory, FaUserCog, FaThumbtack, FaUserCircle, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaCompass, FaArrowLeft, FaRobot, FaComment } from 'react-icons/fa';
+import { FaPaperPlane, FaEllipsisH, FaVolumeUp, FaPlus, FaHistory, FaUserCog, FaThumbtack, FaUserCircle, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaCompass, FaArrowLeft, FaRobot, FaComment, FaTrash } from 'react-icons/fa';
 import moodAvtar from '../assets/moodAvtar.png';
 import dreamAvtar from '../assets/dreamAvtar.png';
 import relationshipAvtar from '../assets/relationshipAvtar.png';
@@ -8,6 +8,7 @@ import stressAvtar from '../assets/stressAvtar.png';
 import anxietyAvtar from '../assets/anxityAvtar.png';
 import { chatbotService } from '../services/chatbotService';
 import ChatHistory from './ChatHistory';
+import DeleteChatModal from './DeleteChatModal';
 import './Chat.css';
 
 const defaultMentors = [
@@ -40,6 +41,7 @@ const Chat = () => {
   const [userInput, setUserInput] = useState("");
   const [showSidebar, setShowSidebar] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sessionId, setSessionId] = useState(currentSessionId);
   const messagesEndRef = useRef(null);
 
@@ -361,6 +363,31 @@ const Chat = () => {
     }
   }, [isCustomChatbot, chatbotId, aiId, navigate]);
 
+  const handleDeleteChat = useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    const mentorName = currentChatbot?.name || selectedMentor;
+    
+    try {
+      const chatbotIdToDelete = isCustomChatbot ? chatbotId : aiId;
+      await chatbotService.clearChatHistory(chatbotIdToDelete);
+      
+      // Clear current chat history
+      setChatHistory([]);
+      setSessionId(null);
+      setShowDeleteModal(false);
+      
+      // Show success message
+      alert(`Chat history with ${mentorName} has been deleted successfully.`);
+      
+    } catch (error) {
+      console.error('Delete chat error:', error);
+      alert('Failed to delete chat history. Please try again.');
+    }
+  }, [currentChatbot, selectedMentor, isCustomChatbot, chatbotId, aiId]);
+
   return (
     <div className="chat-room-container">
       {/* Error Display */}
@@ -476,8 +503,9 @@ const Chat = () => {
 
           <div className="sidebar-menu">
             <button className="menu-item" onClick={handleNewChat}><FaPlus /> New chat</button>
-            <button className="menu-item"><FaVolumeUp /> Voice <span className="menu-meta">Default <FaCompass style={{ transform: 'rotate(90deg)', fontSize: '0.8rem' }} /></span></button>
             <button className="menu-item" onClick={handleHistoryClick}><FaHistory /> History</button>
+            <button className="menu-item delete-chat" onClick={handleDeleteChat}><FaTrash /> Delete chat</button>
+            <button className="menu-item"><FaVolumeUp /> Voice <span className="menu-meta">Default <FaCompass style={{ transform: 'rotate(90deg)', fontSize: '0.8rem' }} /></span></button>
             <button className="menu-item"><FaUserCog /> Customize</button>
             <button className="menu-item"><FaThumbtack /> Pinned</button>
             <button className="menu-item"><FaUserCircle /> Persona</button>
@@ -493,6 +521,14 @@ const Chat = () => {
         isOpen={showChatHistory}
         onClose={() => setShowChatHistory(false)}
         onSelectSession={handleSelectSession}
+      />
+
+      {/* Delete Chat Confirmation Modal */}
+      <DeleteChatModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        mentorName={currentChatbot?.name || selectedMentor}
       />
     </div>
   );
