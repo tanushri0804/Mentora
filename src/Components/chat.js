@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { FaPaperPlane, FaEllipsisH, FaVolumeUp, FaPlus, FaHistory, FaUserCog, FaThumbtack, FaUserCircle, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaCompass, FaArrowLeft, FaRobot, FaComment, FaTrash } from 'react-icons/fa';
+import { FaPaperPlane, FaEllipsisH, FaPlus, FaHistory, FaUserCog, FaThumbtack, FaUserCircle, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaArrowLeft, FaRobot, FaComment, FaTrash } from 'react-icons/fa';
 import moodAvtar from '../assets/moodAvtar.png';
 import dreamAvtar from '../assets/dreamAvtar.png';
 import relationshipAvtar from '../assets/relationshipAvtar.png';
@@ -451,7 +451,6 @@ const Chat = () => {
           </div>
         </div>
         <div className="header-right">
-          <button className="header-icon-btn"><FaVolumeUp /></button>
           <button className="header-icon-btn" onClick={() => setShowSidebar(!showSidebar)}><FaEllipsisH /></button>
         </div>
       </div>
@@ -490,7 +489,7 @@ const Chat = () => {
           placeholder={isTyping ? `${selectedMentor} is typing...` : `Talk to ${selectedMentor}...`}
           disabled={isTyping}
         />
-        <button className="send-btn-icon" onClick={!isTyping && handleUserInput} disabled={isTyping}>
+        <button className="send-btn-icon" onClick={isTyping ? undefined : handleUserInput} disabled={isTyping}>
           <FaPaperPlane />
         </button>
       </div>
@@ -530,10 +529,7 @@ const Chat = () => {
             <button className="menu-item" onClick={handleNewChat}><FaPlus /> New chat</button>
             <button className="menu-item" onClick={handleHistoryClick}><FaHistory /> History</button>
             <button className="menu-item delete-chat" onClick={handleDeleteChat}><FaTrash /> Delete chat</button>
-            <button className="menu-item"><FaVolumeUp /> Voice <span className="menu-meta">Default <FaCompass style={{ transform: 'rotate(90deg)', fontSize: '0.8rem' }} /></span></button>
             <button className="menu-item"><FaUserCog /> Customize</button>
-            <button className="menu-item"><FaThumbtack /> Pinned</button>
-            <button className="menu-item"><FaUserCircle /> Persona</button>
           </div>
         </div>
         <div className="sidebar-overlay" onClick={() => setShowSidebar(false)}></div>

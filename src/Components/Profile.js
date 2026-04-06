@@ -23,9 +23,8 @@ const Profile = () => {
     const [notifications, setNotifications] = useState(true);
     const [privateMode, setPrivateMode] = useState(false);
 
-    // Profile editing states
-    const [isEditing, setIsEditing] = useState(false);
-    const [editType, setEditType] = useState('profile'); // 'avatar' or 'profile'
+    // Profile editing states - simplified for inline editing
+    const [isEditingAvatar, setIsEditingAvatar] = useState(false);
     const [selectedAvatarCategory, setSelectedAvatarCategory] = useState('lorelei');
     const [profileData, setProfileData] = useState({
         displayName: '',
@@ -178,7 +177,6 @@ const Profile = () => {
 
             if (data.success) {
                 setSuccess('Profile updated successfully!');
-                setIsEditing(false);
                 // Clear localStorage after successful save to ensure fresh data from backend
                 localStorage.removeItem('mentora_profile');
             } else {
@@ -252,10 +250,11 @@ const Profile = () => {
                 <p>Manage your account and preferences</p>
             </header>
 
-            {/* Profile Card */}
-            <div className="profile-card">
-                <div className="profile-avatar-wrapper">
-                    <div className="profile-avatar">
+            {/* Profile Details - Always Visible and Editable */}
+            <div className="profile-details-container">
+                {/* Avatar Section */}
+                <div className="profile-avatar-section">
+                    <div className="profile-avatar-large">
                         {profileData.avatar ?
                             (() => {
                                 const selectedAvatar = profileOptions.avatars.find(a => a.id === profileData.avatar);
@@ -284,278 +283,206 @@ const Profile = () => {
                             : <FaUser />
                         }
                     </div>
-                    {!isEditing && (
-                        <button className="edit-avatar-btn" onClick={() => { setEditType('avatar'); setIsEditing(true); }}>
-                            <FaCamera size={14} />
-                        </button>
-                    )}
-                </div>
-                <div className="profile-info">
-                    <h2>{profileData.displayName || user?.name || 'Seeker 732'}</h2>
-                    {profileData.pronouns && <p className="profile-pronouns">{profileData.pronouns}</p>}
-                    {profileData.bio && <p className="profile-bio">{profileData.bio}</p>}
-                </div>
-                {!isEditing && (
-                    <button className="edit-profile-icon-btn" onClick={() => { setEditType('profile'); setIsEditing(true); }} title="Edit Profile">
-                        <FaEdit />
+                    <button className="change-avatar-btn" onClick={() => setIsEditingAvatar(true)}>
+                        <FaCamera /> Change Avatar
                     </button>
-                )}
-                <div className="profile-joined-date">
-                    Joined March 2026
+                </div>
+
+                {/* Basic Information */}
+                <div className="profile-info-section">
+                    <h3>Basic Information</h3>
+                    <div className="info-grid">
+                        <div className="info-item">
+                            <label>Display Name</label>
+                            <input
+                                type="text"
+                                value={profileData.displayName}
+                                onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
+                                placeholder="How should we call you?"
+                                className="info-input"
+                            />
+                        </div>
+                        <div className="info-item">
+                            <label>Pronouns</label>
+                            <select
+                                value={profileData.pronouns}
+                                onChange={(e) => setProfileData(prev => ({ ...prev, pronouns: e.target.value }))}
+                                className="info-select"
+                            >
+                                <option value="">Select pronouns</option>
+                                {profileOptions.pronouns.map(pronoun => (
+                                    <option key={pronoun.value} value={pronoun.value}>
+                                        {pronoun.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bio Section */}
+                <div className="profile-bio-section">
+                    <h3>About Me</h3>
+                    <textarea
+                        value={profileData.bio}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                        placeholder="Tell us about yourself..."
+                        className="bio-textarea"
+                        rows={4}
+                    />
+                </div>
+
+                {/* Location & Website */}
+                <div className="profile-contact-section">
+                    <h3>Contact & Location</h3>
+                    <div className="info-grid">
+                        <div className="info-item">
+                            <label><FaMapMarkerAlt /> Location</label>
+                            <input
+                                type="text"
+                                value={profileData.location}
+                                onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
+                                placeholder="City, Country"
+                                className="info-input"
+                            />
+                        </div>
+                        <div className="info-item">
+                            <label><FaGlobe /> Website</label>
+                            <input
+                                type="url"
+                                value={profileData.website}
+                                onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
+                                placeholder="https://yourwebsite.com"
+                                className="info-input"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Interests Section */}
+                <div className="profile-interests-section">
+                    <h3>Interests</h3>
+                    <div className="interests-grid">
+                        {profileOptions.interests.map(interest => (
+                            <button
+                                key={interest}
+                                type="button"
+                                className={`interest-tag ${profileData.interests.includes(interest) ? 'selected' : ''}`}
+                                onClick={() => toggleInterest(interest)}
+                            >
+                                {interest}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Mood Color Section */}
+                <div className="profile-mood-section">
+                    <h3>Mood Theme Color</h3>
+                    <div className="color-options">
+                        {profileOptions.moodColors.map(color => (
+                            <button
+                                key={color.value}
+                                className={`color-option ${profileData.moodColor === color.value ? 'selected' : ''}`}
+                                style={{ backgroundColor: color.color }}
+                                onClick={() => setProfileData(prev => ({ ...prev, moodColor: color.value }))}
+                            >
+                                {color.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Edit Profile Modal */}
-            {isEditing && (
+            {/* Action Buttons */}
+            <div className="profile-actions">
+                <button
+                    className="save-profile-btn"
+                    onClick={handleSaveProfile}
+                    disabled={loading}
+                >
+                    {loading ? 'Saving...' : (
+                        <>
+                            <FaSave /> Save Profile
+                        </>
+                    )}
+                </button>
+                {error && <div className="error-message">{error}</div>}
+                {success && <div className="success-message">{success}</div>}
+            </div>
+
+            {/* Avatar Selection Modal */}
+            {isEditingAvatar && (
                 <div className="profile-edit-modal">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h3>{editType === 'avatar' ? 'Change Avatar' : 'Edit Profile'}</h3>
-                            <button className="close-btn" onClick={() => setIsEditing(false)}>
+                            <h3>Choose Avatar</h3>
+                            <button className="close-btn" onClick={() => setIsEditingAvatar(false)}>
                                 <FaTimes />
                             </button>
                         </div>
 
                         <div className="modal-body">
-                            {/* Avatar Selection View */}
-                            {editType === 'avatar' && (
-                                <div className="form-section">
-                                    <label>Choose your appearance</label>
+                            <div className="form-section">
+                                <label>Choose your appearance</label>
 
-                                    <div className="avatar-category-tabs">
-                                        {CATEGORIES.map(cat => (
-                                            <button
-                                                key={cat}
-                                                className={`category-tab ${selectedAvatarCategory === cat ? 'active' : ''}`}
-                                                onClick={() => setSelectedAvatarCategory(cat)}
-                                            >
-                                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <div className="avatar-grid">
-                                        {profileOptions.avatars.filter(a => a.category === selectedAvatarCategory).length > 0 ? (
-                                            profileOptions.avatars.filter(a => a.category === selectedAvatarCategory).map(avatar => (
-                                                <button
-                                                    key={avatar.id}
-                                                    className={`avatar-option ${profileData.avatar === avatar.id ? 'selected' : ''}`}
-                                                    onClick={() => setProfileData(prev => ({ ...prev, avatar: avatar.id }))}
-                                                >
-                                                    {avatar.image ? (
-                                                        <img
-                                                            src={avatar.image}
-                                                            alt={avatar.name}
-                                                            className="avatar-image"
-                                                            onError={(e) => {
-                                                                e.target.style.display = 'none';
-                                                                e.target.nextSibling.style.display = 'block';
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <span
-                                                        className="avatar-emoji"
-                                                        style={{ display: avatar.image ? 'none' : 'block' }}
-                                                    >
-                                                        {avatar.emoji || '👤'}
-                                                    </span>
-                                                </button>
-                                            ))
-                                        ) : (
-                                            <div className="no-options">No avatars available in this category</div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Profile Details View */}
-                            {editType === 'profile' && (
-                                <>
-                                    <div className="form-section">
-                                        <label>Display Name</label>
-                                        <input
-                                            type="text"
-                                            value={profileData.displayName}
-                                            onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
-                                            placeholder="How should we call you?"
-                                        />
-                                    </div>
-
-                                    <div className="form-section">
-                                        <label>Pronouns</label>
-                                        <select
-                                            value={profileData.pronouns}
-                                            onChange={(e) => setProfileData(prev => ({ ...prev, pronouns: e.target.value }))}
+                                <div className="avatar-category-tabs">
+                                    {CATEGORIES.map(cat => (
+                                        <button
+                                            key={cat}
+                                            className={`category-tab ${selectedAvatarCategory === cat ? 'active' : ''}`}
+                                            onClick={() => setSelectedAvatarCategory(cat)}
                                         >
-                                            <option value="">Select pronouns</option>
-                                            {profileOptions.pronouns.map(pronoun => (
-                                                <option key={pronoun.value} value={pronoun.value}>
-                                                    {pronoun.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
 
-                                    <div className="form-section">
-                                        <label>Bio</label>
-                                        <textarea
-                                            value={profileData.bio}
-                                            onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                                            placeholder="Tell us about yourself..."
-                                            rows={3}
-                                        />
-                                    </div>
-
-                                    <div className="form-row">
-                                        <div className="form-section">
-                                            <label><FaMapMarkerAlt /> Location</label>
-                                            <input
-                                                type="text"
-                                                value={profileData.location}
-                                                onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
-                                                placeholder="City, Country"
-                                            />
-                                        </div>
-                                        <div className="form-section">
-                                            <label><FaGlobe /> Website</label>
-                                            <input
-                                                type="url"
-                                                value={profileData.website}
-                                                onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
-                                                placeholder="https://yourwebsite.com"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="form-section">
-                                        <label>Interests</label>
-                                        <div className="interests-grid">
-                                            {profileOptions.interests.map(interest => (
-                                                <button
-                                                    key={interest}
-                                                    type="button"
-                                                    className={`interest-tag ${profileData.interests.includes(interest) ? 'selected' : ''}`}
-                                                    onClick={() => toggleInterest(interest)}
+                                <div className="avatar-grid">
+                                    {profileOptions.avatars.filter(a => a.category === selectedAvatarCategory).length > 0 ? (
+                                        profileOptions.avatars.filter(a => a.category === selectedAvatarCategory).map(avatar => (
+                                            <button
+                                                key={avatar.id}
+                                                className={`avatar-option ${profileData.avatar === avatar.id ? 'selected' : ''}`}
+                                                onClick={() => setProfileData(prev => ({ ...prev, avatar: avatar.id }))}
+                                            >
+                                                {avatar.image ? (
+                                                    <img
+                                                        src={avatar.image}
+                                                        alt={avatar.name}
+                                                        className="avatar-image"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextSibling.style.display = 'block';
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <span
+                                                    className="avatar-emoji"
+                                                    style={{ display: avatar.image ? 'none' : 'block' }}
                                                 >
-                                                    {interest}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="form-section">
-                                        <label><FaPalette /> Mood Theme Color</label>
-                                        <div className="color-options">
-                                            {profileOptions.moodColors.map(color => (
-                                                <button
-                                                    key={color.value}
-                                                    className={`color-option ${profileData.moodColor === color.value ? 'selected' : ''}`}
-                                                    style={{ backgroundColor: color.color }}
-                                                    onClick={() => setProfileData(prev => ({ ...prev, moodColor: color.value }))}
-                                                >
-                                                    {color.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-
-                            {error && <div className="error-message">{error}</div>}
-                            {success && <div className="success-message">{success}</div>}
+                                                    {avatar.emoji || '👤'}
+                                                </span>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="no-options">No avatars available in this category</div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="modal-footer">
-                            <button className="cancel-btn" onClick={() => setIsEditing(false)}>
+                            <button className="cancel-btn" onClick={() => setIsEditingAvatar(false)}>
                                 Cancel
                             </button>
-                            <button
-                                className="save-btn"
-                                onClick={handleSaveProfile}
-                                disabled={loading}
-                            >
-                                {loading ? 'Saving...' : (
-                                    <>
-                                        <FaSave /> {editType === 'avatar' ? 'Save Avatar' : 'Save Profile'}
-                                    </>
-                                )}
+                            <button className="save-btn" onClick={() => setIsEditingAvatar(false)}>
+                                Done
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-
-            {/* Stats */}
-            <div className="profile-stats-grid">
-                <div className="stat-card fade-in-up" style={{ animationDelay: '0.1s' }}>
-                    <FaFireAlt className="stat-icon" />
-                    <h3 className="stat-value">14</h3>
-                    <p className="stat-label">Day Streak</p>
-                </div>
-                <div className="stat-card fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <FaRegComments className="stat-icon" />
-                    <h3 className="stat-value">32</h3>
-                    <p className="stat-label">Conversations</p>
-                </div>
-                <div className="stat-card fade-in-up" style={{ animationDelay: '0.3s' }}>
-                    <FaHeartbeat className="stat-icon" />
-                    <h3 className="stat-value">Stable</h3>
-                    <p className="stat-label">Mood Trend</p>
-                </div>
-            </div>
-
-            {/* Settings */}
-            <div className="settings-section fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <h3>App Settings</h3>
-
-                <div className="setting-item">
-                    <div className="setting-info">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <FaBell style={{ color: 'var(--text-muted)' }} />
-                            <h4>Daily Reminders</h4>
-                        </div>
-                        <p>Get notified for your daily check-ins</p>
-                    </div>
-                    <div
-                        className={`toggle-switch ${notifications ? 'active' : ''}`}
-                        onClick={() => setNotifications(!notifications)}
-                    >
-                        <div className="toggle-knob"></div>
-                    </div>
-                </div>
-
-                <div className="setting-item">
-                    <div className="setting-info">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <FaMoon style={{ color: 'var(--text-muted)' }} />
-                            <h4>Dark Mode</h4>
-                        </div>
-                        <p>Toggle dark or light theme</p>
-                    </div>
-                    <div
-                        className={`toggle-switch ${themeDark ? 'active' : ''}`}
-                        onClick={() => setThemeDark(!themeDark)}
-                    >
-                        <div className="toggle-knob"></div>
-                    </div>
-                </div>
-
-                <div className="setting-item">
-                    <div className="setting-info">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <FaLock style={{ color: 'var(--text-muted)' }} />
-                            <h4>Private Mode</h4>
-                        </div>
-                        <p>Hide chat content when multitasking</p>
-                    </div>
-                    <div
-                        className={`toggle-switch ${privateMode ? 'active' : ''}`}
-                        onClick={() => setPrivateMode(!privateMode)}
-                    >
-                        <div className="toggle-knob"></div>
-                    </div>
-                </div>
-            </div>
 
             <div className="logout-btn-wrapper fade-in-up" style={{ animationDelay: '0.5s' }}>
                 <button className="logout-btn" onClick={handleLogout}>
