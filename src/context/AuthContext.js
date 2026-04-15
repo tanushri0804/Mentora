@@ -141,6 +141,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             setUser(data.data);
+            localStorage.setItem('mentora_user', JSON.stringify(data.data));
             return data;
         } catch (error) {
             setError(error.message);

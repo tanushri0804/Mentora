@@ -890,30 +890,41 @@ const Storyteller = () => {
             ))}
           </div>
 
-          <div className="story-feed fade-in-up" style={{ animationDelay: '0.2s' }}>
-            {filteredStories.map((story) => {
-              const emotionMeta = getEmotionDetails(story.emotion);
-              return (
-                <div key={story.id} className="story-card" onClick={() => setReadingStory(story)}>
-                  <img src={story.cover} alt="Cover" className="story-cover" />
-                  <div className="story-content">
-                    <div className="story-meta">
-                      <span className="story-emotion" style={{ background: `${emotionMeta.color}33`, color: emotionMeta.color }}>
-                        {emotionMeta.label}
-                      </span>
-                      <span className="story-author">{story.author}</span>
-                    </div>
-                    <h3>{story.title}</h3>
-                    <p className="story-preview">{story.description}</p>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 'auto', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>{story.date}</span>
-                      <span>{story.pages.length} Pages</span>
+          {filteredStories.length === 0 ? (
+            <div className="empty-state fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <FaBookOpen className="empty-state-icon" />
+              <h3>Oh no! No stories here yet...</h3>
+              <p>Be the first one to share a story with the community. Every voice matters!</p>
+              <button className="create-story-btn" onClick={startWriting}>
+                <FaPen size={14} /> Create Story
+              </button>
+            </div>
+          ) : (
+            <div className="story-feed fade-in-up" style={{ animationDelay: '0.2s' }}>
+              {filteredStories.map((story) => {
+                const emotionMeta = getEmotionDetails(story.emotion);
+                return (
+                  <div key={story.id} className="story-card" onClick={() => setReadingStory(story)}>
+                    <img src={story.cover} alt="Cover" className="story-cover" />
+                    <div className="story-content">
+                      <div className="story-meta">
+                        <span className="story-emotion" style={{ background: `${emotionMeta.color}33`, color: emotionMeta.color }}>
+                          {emotionMeta.label}
+                        </span>
+                        <span className="story-author">{story.author}</span>
+                      </div>
+                      <h3>{story.title}</h3>
+                      <p className="story-preview">{story.description}</p>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 'auto', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{story.date}</span>
+                        <span>{story.pages.length} Pages</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
 

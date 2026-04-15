@@ -9,6 +9,8 @@ import anxietyAvtar from '../assets/anxityAvtar.png';
 import { chatbotService } from '../services/chatbotService';
 import ChatHistory from './ChatHistory';
 import DeleteChatModal from './DeleteChatModal';
+import ChatCustomizer from './ChatCustomizer';
+import { useTheme } from '../context/ThemeContext';
 import './Chat.css';
 
 const defaultMentors = [
@@ -24,6 +26,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const currentSessionId = searchParams.get('sessionId');
+  const { theme } = useTheme();
 
   // State for chatbot data
   const [currentChatbot, setCurrentChatbot] = useState(null);
@@ -43,6 +46,7 @@ const Chat = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCustomizer, setShowCustomizer] = useState(false);
   const [sessionId, setSessionId] = useState(currentSessionId);
   const messagesEndRef = useRef(null);
 
@@ -400,8 +404,40 @@ const Chat = () => {
     }
   }, [currentChatbot, selectedMentor, isCustomChatbot, chatbotId, aiId]);
 
+  const fontSizeMap = {
+    small: '13px',
+    medium: '15px',
+    large: '18px'
+  };
+
+  const bubbleStyle = {
+    fontSize: fontSizeMap[theme.fontSize] || '15px',
+    borderRadius: theme.messageStyle === 'square' ? '8px' : '20px',
+    padding: theme.isCompact ? '8px 12px' : '14px 20px'
+  };
+
   return (
-    <div className="chat-room-container">
+    <div className="chat-room-container" style={{ backgroundColor: theme.chatBackground }}>
+      {/* Dynamic Background Image Layer */}
+      {theme.backgroundImage && (
+        <div 
+          className="chat-bg-image-overlay" 
+          style={{ 
+            backgroundImage: `url(${theme.backgroundImage})`,
+            opacity: theme.backgroundOpacity,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+
       {/* Error Display */}
       {error && (
         <div className="error-message" style={{
@@ -459,14 +495,27 @@ const Chat = () => {
       <div className="chat-messages-area">
 
         {chatHistory.map((msg, index) => (
-          <div key={index} className={`message-bubble ${msg.sender === "bot" ? "bot-bubble" : "user-bubble"}`}>
+          <div 
+            key={index} 
+            className={`message-bubble ${msg.sender === "bot" ? "bot-bubble" : "user-bubble"}`}
+            style={{
+              ...bubbleStyle,
+              background: msg.sender === 'user' ? theme.userBubbleColor : theme.botBubbleColor
+            }}
+          >
             {msg.text}
           </div>
         ))}
         
         {/* Typing Indicator */}
         {isTyping && (
-          <div className="message-bubble bot-bubble typing-indicator">
+          <div 
+            className="message-bubble bot-bubble typing-indicator"
+            style={{
+              ...bubbleStyle,
+              background: theme.botBubbleColor
+            }}
+          >
             <div className="typing-dots">
               <span></span>
               <span></span>
@@ -529,7 +578,7 @@ const Chat = () => {
             <button className="menu-item" onClick={handleNewChat}><FaPlus /> New chat</button>
             <button className="menu-item" onClick={handleHistoryClick}><FaHistory /> History</button>
             <button className="menu-item delete-chat" onClick={handleDeleteChat}><FaTrash /> Delete chat</button>
-            <button className="menu-item"><FaUserCog /> Customize</button>
+            <button className="menu-item" onClick={() => { setShowCustomizer(true); setShowSidebar(false); }}><FaUserCog /> Customize</button>
           </div>
         </div>
         <div className="sidebar-overlay" onClick={() => setShowSidebar(false)}></div>
@@ -550,6 +599,12 @@ const Chat = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
         mentorName={currentChatbot?.name || selectedMentor}
+      />
+
+      {/* Customizer Modal */}
+      <ChatCustomizer 
+        isOpen={showCustomizer}
+        onClose={() => setShowCustomizer(false)}
       />
     </div>
   );

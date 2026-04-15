@@ -13,24 +13,27 @@ import Discover from './Components/Discover';
 import ChatList from './Components/ChatList';
 import Profile from './Components/Profile';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
+      <ThemeProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Routes with Bottom Nav */}
-          <Route path="/chat/*" element={<ChatInterfaceWithTabs />} />
+            {/* Routes with Bottom Nav */}
+            <Route path="/chat/*" element={<ChatInterfaceWithTabs />} />
 
-          <Route path="/question-ans" element={<QuestionAns />} />
-          <Route path="/sleeptool" element={<Sleeptool />} />
-          <Route path="/creative" element={<Creative />} />
-        </Routes>
-      </Router>
+            <Route path="/question-ans" element={<QuestionAns />} />
+            <Route path="/sleeptool" element={<Sleeptool />} />
+            <Route path="/creative" element={<Creative />} />
+          </Routes>
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }
