@@ -359,7 +359,7 @@ const Chat = () => {
     setSessionId(null);
     // Navigate to new chat without session ID
     if (isCustomChatbot) {
-      navigate(`/chatbot/${chatbotId}`);
+      navigate(`/chat/chatbot/${chatbotId}`);
     } else {
       navigate(`/chat/${aiId}`);
     }
@@ -372,9 +372,9 @@ const Chat = () => {
   const handleSelectSession = useCallback((newSessionId) => {
     setSessionId(newSessionId);
     // Navigate to the chat with the session ID
-    if (isCustomChatbot) {
-      navigate(`/chatbot/${chatbotId}?sessionId=${newSessionId}`);
-    } else {
+    if (isCustomChatbot && chatbotId) {
+      navigate(`/chat/chatbot/${chatbotId}?sessionId=${newSessionId}`);
+    } else if (!isCustomChatbot && aiId) {
       navigate(`/chat/${aiId}?sessionId=${newSessionId}`);
     }
   }, [isCustomChatbot, chatbotId, aiId, navigate]);
@@ -555,7 +555,17 @@ const Chat = () => {
             />
             <h2>{currentChatbot?.name || selectedMentor}</h2>
             <p className="sidebar-author">
-              By {currentChatbot?.isOfficial ? '@mentora_official' : 'Custom Creator'}
+              By {currentChatbot?.isOfficial ? '@mentora_official' : (
+                currentChatbot?.user?.username ? (
+                  <span 
+                    className="creator-link" 
+                    onClick={() => navigate(`/profile/${currentChatbot.user.username}`)}
+                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    {currentChatbot.user.name || currentChatbot.user.username}
+                  </span>
+                ) : (currentChatbot?.user?.name || 'Custom Creator')
+              )}
             </p>
             <div className="sidebar-interactions">
               <FaComment className="interactions-icon" />

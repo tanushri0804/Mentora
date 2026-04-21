@@ -1,70 +1,168 @@
-# Getting Started with Create React App
+# Mentora - AI-Powered Mental Wellness Companion
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Mentora is a comprehensive mental health and wellness application that provides users with AI-powered companions for emotional support, mood tracking, self-care resources, and community engagement. Built with React and powered by advanced AI technology, Mentora offers a safe and supportive environment for personal growth and well-being.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### AI Chat Companions
+- **Official Mentors**: Pre-built AI companions specializing in different areas:
+  - **Mood Mentor**: Your steady companion for emotional balance
+  - **Stress Buster**: Immediate stress relief and talk therapy
+  - **Dream Weaver**: Dream interpretation and sleep hygiene improvement
+  - **Anxiety Ally**: Guidance through anxious thoughts
+  - **Relationship Rescuer**: Advice for healthy boundaries and relationships
 
-### `npm start`
+- **Custom Chatbot Creation**: Build personalized AI mentors with:
+  - Custom personality and behavior prompts
+  - Personalized intro messages
+  - Premium avatar selection (60+ avatars across 5 categories)
+  - Public or private visibility settings
+  - Custom descriptions and system prompts
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Chat Features
+- **Real-time Conversations**: Engage in natural, flowing conversations with AI companions
+- **Session Management**: Save and revisit chat sessions with automatic history preservation
+- **Typing Indicators**: Visual feedback when AI is responding
+- **Message Customization**: Adjustable bubble styles, fonts, and colors
+- **Background Themes**: Multiple preset themes with custom background images
+- **Chat History**: Browse and resume previous conversations
+- **Feedback System**: Rate responses with thumbs up/down
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Mood Tracking
+- **Daily Check-ins**: Quick emotional wellness assessments
+- **Comprehensive Questions**: Evaluate mood, energy, mental clarity, social connection, and stress levels
+- **Visual Mood Reports**: Track emotional patterns over time
+- **Personalized Insights**: Get recommendations based on mood trends
 
-### `npm test`
+### Self-Care Resources
+- **Guided Activities**: Timer-based self-care sessions including:
+  - Meditation and mindfulness exercises
+  - Creative expression activities
+  - Sleep support tools
+  - Physical exercise routines
+  - Reading and journaling prompts
+- **Customizable Durations**: Set personalized session lengths
+- **Progress Tracking**: Monitor self-care habits and consistency
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Story Sharing Community
+- **Emotional Storytelling**: Share personal experiences with different emotional contexts
+- **Community Support**: Read and comment on stories from other users
+- **Emotion Categories**: Organize stories by emotional themes (joyful, sad, anxious, hopeful, neutral)
+- **Interactive Reading**: Page-by-page story navigation with beautiful cover images
 
-### `npm run build`
+### Personalization & Profile
+- **Custom Profiles**: Personalize your experience with:
+  - Premium avatar selection
+  - Display names and pronouns
+  - Bio and location information
+  - Interest tags
+  - Mood color preferences
+- **Theme Customization**: 
+  - Multiple preset themes (Dark Night, Ocean Blue, Sunset, Minimal Light)
+  - Custom background images with opacity controls
+  - Adjustable font sizes and message bubble styles
+  - Compact display options
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### User Experience
+- **Authentication System**: Secure login with guest access option
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Intuitive Navigation**: Bottom navigation bar for easy access to all features
+- **Search Functionality**: Find chatbots and content quickly
+- **Real-time Updates**: Live interaction counts and status indicators
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Technology Stack
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Frontend
+- **React 18.3.1**: Modern React with hooks and context API
+- **React Router 6.27.0**: Client-side routing and navigation
+- **React Icons 5.3.0**: Comprehensive icon library
+- **Emotion 11.13.3**: CSS-in-JS styling solution
+- **FontAwesome 6.6.0**: Premium icon sets
 
-### `npm run eject`
+### Architecture
+- **Component-Based Design**: Modular, reusable React components
+- **Context API**: State management for authentication and themes
+- **Service Layer**: Organized API communication and data management
+- **Responsive CSS**: Mobile-first design with custom animations
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Key Components
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Core Pages
+- **HomePage**: Landing page with authentication and app introduction
+- **Discover**: Browse and create AI companions
+- **ChatInterface**: Main chat interface with real-time messaging
+- **MoodTracker**: Daily emotional wellness assessments
+- **SelfCareResources**: Guided self-care activities
+- **Storyteller**: Community story sharing platform
+- **Profile**: User profile and customization settings
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Supporting Components
+- **BottomNav**: Navigation component for main app sections
+- **ChatHistory**: Session management and history browsing
+- **ChatCustomizer**: Theme and appearance customization
+- **DeleteChatModal**: Chat history management
+- **LoginPage**: User authentication interface
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Getting Started
 
-## Learn More
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn package manager
+- Backend API server running (see Mentora-Backend repository)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Installation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/Mentora.git
+cd Mentora
+```
 
-### Code Splitting
+2. Install dependencies:
+```bash
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+3. Start the development server:
+```bash
+npm start
+```
 
-### Analyzing the Bundle Size
+4. Open [http://localhost:3000](http://localhost:3000) to view the application
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Available Scripts
 
-### Making a Progressive Web App
+- `npm start`: Runs the app in development mode
+- `npm test`: Launches the test runner
+- `npm run build`: Builds the app for production
+- `npm run eject`: Ejects from Create React App (one-way operation)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## API Integration
 
-### Advanced Configuration
+The frontend integrates with a Node.js/Express backend for:
+- User authentication and profile management
+- AI chatbot services and conversation management
+- Chat history and session persistence
+- Custom chatbot creation and storage
+- Mood tracking data storage
+- Story sharing and community features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Contributing
 
-### Deployment
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## License
 
-### `npm run build` fails to minify
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Support
+
+For support, questions, or feature requests, please open an issue on the GitHub repository or contact the development team.
+
+---
+
+**Mentora** - Your mind deserves a safe space. Talk, reflect, and heal with your personal AI companion built for emotional well-being, self-care, and growth.

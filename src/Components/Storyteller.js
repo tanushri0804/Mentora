@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { FaPen, FaTimes, FaGlobe, FaChevronLeft, FaChevronRight, FaPlus, FaBookOpen, FaCommentDots } from 'react-icons/fa';
+import { FaPen, FaTimes, FaGlobe, FaChevronLeft, FaChevronRight, FaPlus, FaBookOpen, FaCommentDots, FaUserCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './Storyteller.css';
+
+// Premium avatars from DiceBear API (same as in Profile component)
+const CATEGORIES = ['lorelei', 'adventurer', 'avataaars', 'bottts', 'notionists'];
+const PREMIUM_AVATARS = CATEGORIES.flatMap(cat =>
+    Array.from({ length: 12 }, (_, i) => ({
+        id: `${cat}-${i + 1}`,
+        name: `${cat.charAt(0).toUpperCase() + cat.slice(1)} ${i + 1}`,
+        image: `https://api.dicebear.com/7.x/${cat}/svg?seed=${cat}${i + 1}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`,
+        category: cat
+    }))
+);
 
 // Default images for creating stories
 const COVER_IMAGES = [
@@ -73,7 +85,15 @@ const DEFAULT_STORIES = [
 
 const MAX_PAGES = 20;
 
+// Helper function to get avatar image from ID
+const getAvatarImage = (avatarId) => {
+  if (!avatarId) return null;
+  const selectedAvatar = PREMIUM_AVATARS.find(a => a.id === avatarId);
+  return selectedAvatar?.image || null;
+};
+
 const Storyteller = () => {
+  const navigate = useNavigate();
   const [stories, setStories] = useState([]);
   const [userComments, setUserComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,6 +149,8 @@ const Storyteller = () => {
             comments: (story.comments || []).map(comment => ({
               id: comment.id,
               author: comment.user.username || '@user',
+              authorName: comment.user.name || comment.user.username,
+              authorAvatar: comment.user.avatar || null,
               text: comment.content,
               date: new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             })),
@@ -174,6 +196,8 @@ const Storyteller = () => {
             comments: (story.comments || []).map(comment => ({
               id: comment.id,
               author: comment.user.username || '@user',
+              authorName: comment.user.name || comment.user.username,
+              authorAvatar: comment.user.avatar || null,
               text: comment.content,
               date: new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             })),
@@ -493,6 +517,8 @@ const Storyteller = () => {
       const formattedComment = {
         id: savedComment.id,
         author: savedComment.user.username || '@you',
+        authorName: savedComment.user.name || savedComment.user.username,
+        authorAvatar: savedComment.user.avatar || null,
         text: savedComment.content,
         date: new Date(savedComment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       };
@@ -621,15 +647,35 @@ const Storyteller = () => {
             <h3>Community Support & Thoughts</h3>
             <div className="comments-list">
               {readingStory.comments && readingStory.comments.length > 0 ? (
-                readingStory.comments.map(comment => (
-                  <div key={comment.id} className="comment-item">
-                    <div className="comment-header">
-                      <strong>{comment.author}</strong>
-                      <span className="comment-date">{comment.date}</span>
+                readingStory.comments.map(comment => {
+                  const avatarImage = getAvatarImage(comment.authorAvatar);
+                  return (
+                    <div key={comment.id} className="comment-item">
+                      <div className="comment-header">
+                        <div className="comment-author-info">
+                          <div className="comment-avatar">
+                            {avatarImage ? (
+                              <img src={avatarImage} alt={comment.author} className="comment-avatar-img" />
+                            ) : (
+                              <FaUserCircle className="comment-avatar-placeholder" />
+                            )}
+                          </div>
+                          <div className="comment-author-details">
+                            <strong 
+                              className="comment-author-name"
+                              onClick={() => comment.author !== '@you' && navigate(`/profile/${comment.author}`)}
+                              style={{ cursor: comment.author !== '@you' ? 'pointer' : 'default' }}
+                            >
+                              {comment.authorName || comment.author}
+                            </strong>
+                            <span className="comment-date">{comment.date}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="comment-text">{comment.text}</p>
                     </div>
-                    <p>{comment.text}</p>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="no-comments">No comments yet. Be the first to share your thoughts!</p>
               )}

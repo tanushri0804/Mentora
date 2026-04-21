@@ -12,6 +12,7 @@ import BottomNav from './Components/BottomNav';
 import Discover from './Components/Discover';
 import ChatList from './Components/ChatList';
 import Profile from './Components/Profile';
+import PublicProfile from './Components/PublicProfile';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
@@ -31,6 +32,7 @@ function App() {
             <Route path="/question-ans" element={<QuestionAns />} />
             <Route path="/sleeptool" element={<Sleeptool />} />
             <Route path="/creative" element={<Creative />} />
+            <Route path="/profile/:username" element={<PublicProfile />} />
           </Routes>
         </Router>
       </ThemeProvider>

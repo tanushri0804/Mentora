@@ -175,7 +175,17 @@ const Discover = () => {
                     )}
                 </div>
                 <span className="ai-card-author">
-                    By {bot.isOfficial ? '@mentora_official' : 'Custom Creator'}
+                    By {bot.isOfficial ? '@mentora_official' : (
+                        bot.user?.username ? (
+                            <span 
+                                className="creator-link" 
+                                onClick={() => navigate(`/profile/${bot.user.username}`)}
+                                style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                {bot.user.name || bot.user.username}
+                            </span>
+                        ) : (bot.user?.name || 'Custom Creator')
+                    )}
                 </span>
                 <p className="ai-card-desc">{bot.description}</p>
                 <div className="ai-card-footer">
