@@ -3,6 +3,7 @@ import HomePage from './Components/HomePage';
 import LoginPage from './Components/LoginPage';
 import ChatInterface from './Components/ChatInterface';
 import MoodTracker from './Components/MoodTracker';
+import MoodHistory from './Components/MoodHistory';
 import SelfCareResources from './Components/SelfCareResources';
 import Storyteller from './Components/Storyteller';
 import QuestionAns from './Components/QuestionAns';
@@ -50,6 +51,7 @@ const ChatInterfaceWithTabs = () => (
         <Route path="chatbot/:aiId" element={<ChatInterface />} />
         <Route path=":aiId" element={<ChatInterface />} />
         <Route path="mood-tracker" element={<MoodTracker />} />
+        <Route path="mood-history" element={<MoodHistory />} />
         <Route path="self-care" element={<SelfCareResources />} />
         <Route path="story" element={<Storyteller />} />
         <Route path="profile" element={<Profile />} />

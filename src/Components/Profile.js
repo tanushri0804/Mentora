@@ -250,47 +250,46 @@ const Profile = () => {
                 <p>Manage your account and preferences</p>
             </header>
 
-            {/* Profile Details - Always Visible and Editable */}
-            <div className="profile-details-container">
-                {/* Avatar Section */}
-                <div className="profile-avatar-section">
-                    <div className="profile-avatar-large">
-                        {profileData.avatar ?
-                            (() => {
+            {/* Bento Grid */}
+            <div className="bento-grid">
+
+                {/* ── Avatar Card (2×2) ── */}
+                <div className="bento-card bento-avatar">
+                    <div className="profile-avatar-ring">
+                        <div className="profile-avatar-inner">
+                            {(() => {
                                 const selectedAvatar = profileOptions.avatars.find(a => a.id === profileData.avatar);
-                                return (
-                                    <>
-                                        {selectedAvatar?.image ? (
-                                            <img
-                                                src={selectedAvatar.image}
-                                                alt={selectedAvatar.name}
-                                                className="profile-avatar-image"
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
-                                                    e.target.nextSibling.style.display = 'block';
-                                                }}
-                                            />
-                                        ) : null}
-                                        <span
-                                            className="profile-avatar-emoji"
-                                            style={{ display: selectedAvatar?.image ? 'none' : 'block' }}
-                                        >
-                                            {selectedAvatar?.emoji || <FaUser />}
-                                        </span>
-                                    </>
+                                return selectedAvatar?.image ? (
+                                    <img
+                                        src={selectedAvatar.image}
+                                        alt={selectedAvatar.name}
+                                        className="profile-avatar-image"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                        }}
+                                    />
+                                ) : (
+                                    <span className="profile-avatar-emoji"><FaUser /></span>
                                 );
-                            })()
-                            : <FaUser />
-                        }
+                            })()}
+                        </div>
+                    </div>
+                    <div>
+                        <p className="bento-avatar-name">
+                            {profileData.displayName || user?.name || 'Your Name'}
+                        </p>
+                        <p className="bento-avatar-sub">
+                            {profileData.pronouns || 'Set your pronouns'}
+                        </p>
                     </div>
                     <button className="change-avatar-btn" onClick={() => setIsEditingAvatar(true)}>
                         <FaCamera /> Change Avatar
                     </button>
                 </div>
 
-                {/* Basic Information */}
-                <div className="profile-info-section">
-                    <h3>Basic Information</h3>
+                {/* ── Basic Info Card (2×1) ── */}
+                <div className="bento-card bento-info">
+                    <p className="bento-label"><FaUser className="label-icon" /> Basic Info</p>
                     <div className="info-grid">
                         <div className="info-item">
                             <label>Display Name</label>
@@ -320,21 +319,86 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Bio Section */}
-                <div className="profile-bio-section">
-                    <h3>About Me</h3>
+                {/* ── Bio Card (2×2) ── */}
+                <div className="bento-card bento-bio">
+                    <p className="bento-label">About Me</p>
                     <textarea
                         value={profileData.bio}
                         onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                        placeholder="Tell us about yourself..."
+                        placeholder="Tell us a little about yourself…"
                         className="bio-textarea"
-                        rows={4}
                     />
                 </div>
 
-                {/* Location & Website */}
-                <div className="profile-contact-section">
-                    <h3>Contact & Location</h3>
+                {/* ── Mood Theme Card (1×1) ── */}
+                <div className="bento-card bento-mood">
+                    <p className="bento-label"><FaPalette className="label-icon" /> Mood Theme</p>
+                    <div className="color-options-bento">
+                        {profileOptions.moodColors.map(color => (
+                            <button
+                                key={color.value}
+                                className={`color-option-bento ${profileData.moodColor === color.value ? 'selected' : ''}`}
+                                onClick={() => setProfileData(prev => ({ ...prev, moodColor: color.value }))}
+                            >
+                                <span className="color-dot" style={{ backgroundColor: color.color }} />
+                                {color.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Quick Settings Card (1×1) ── */}
+                <div className="bento-card bento-privacy">
+                    <p className="bento-label">Quick Settings</p>
+                    <div className="mini-toggle-row">
+                        <span className="mini-toggle-label"><FaMoon /> Dark Mode</span>
+                        <div
+                            className={`toggle-switch ${themeDark ? 'active' : ''}`}
+                            onClick={() => setThemeDark(p => !p)}
+                        >
+                            <div className="toggle-knob" />
+                        </div>
+                    </div>
+                    <div className="mini-toggle-row">
+                        <span className="mini-toggle-label"><FaBell /> Notifications</span>
+                        <div
+                            className={`toggle-switch ${notifications ? 'active' : ''}`}
+                            onClick={() => setNotifications(p => !p)}
+                        >
+                            <div className="toggle-knob" />
+                        </div>
+                    </div>
+                    <div className="mini-toggle-row">
+                        <span className="mini-toggle-label"><FaLock /> Private</span>
+                        <div
+                            className={`toggle-switch ${privateMode ? 'active' : ''}`}
+                            onClick={() => setPrivateMode(p => !p)}
+                        >
+                            <div className="toggle-knob" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Interests Card (2×1) ── */}
+                <div className="bento-card bento-interests">
+                    <p className="bento-label"><FaHeartbeat className="label-icon" /> Interests</p>
+                    <div className="interests-grid">
+                        {profileOptions.interests.map(interest => (
+                            <button
+                                key={interest}
+                                type="button"
+                                className={`interest-tag ${profileData.interests.includes(interest) ? 'selected' : ''}`}
+                                onClick={() => toggleInterest(interest)}
+                            >
+                                {interest}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Contact Card (2×1) ── */}
+                <div className="bento-card bento-contact">
+                    <p className="bento-label">Contact & Location</p>
                     <div className="info-grid">
                         <div className="info-item">
                             <label><FaMapMarkerAlt /> Location</label>
@@ -359,56 +423,26 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Interests Section */}
-                <div className="profile-interests-section">
-                    <h3>Interests</h3>
-                    <div className="interests-grid">
-                        {profileOptions.interests.map(interest => (
-                            <button
-                                key={interest}
-                                type="button"
-                                className={`interest-tag ${profileData.interests.includes(interest) ? 'selected' : ''}`}
-                                onClick={() => toggleInterest(interest)}
-                            >
-                                {interest}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+            </div>{/* end bento-grid */}
 
-                {/* Mood Color Section */}
-                <div className="profile-mood-section">
-                    <h3>Mood Theme Color</h3>
-                    <div className="color-options">
-                        {profileOptions.moodColors.map(color => (
-                            <button
-                                key={color.value}
-                                className={`color-option ${profileData.moodColor === color.value ? 'selected' : ''}`}
-                                style={{ backgroundColor: color.color }}
-                                onClick={() => setProfileData(prev => ({ ...prev, moodColor: color.value }))}
-                            >
-                                {color.label}
-                            </button>
-                        ))}
-                    </div>
+            {/* ── Actions Row ── */}
+            <div className="profile-actions-bento">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                    <button
+                        className="save-profile-btn"
+                        onClick={handleSaveProfile}
+                        disabled={loading}
+                    >
+                        {loading ? 'Saving…' : <><FaSave /> Save Profile</>}
+                    </button>
+                    {error   && <div className="error-message">{error}</div>}
+                    {success && <div className="success-message">{success}</div>}
                 </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="profile-actions">
-                <button
-                    className="save-profile-btn"
-                    onClick={handleSaveProfile}
-                    disabled={loading}
-                >
-                    {loading ? 'Saving...' : (
-                        <>
-                            <FaSave /> Save Profile
-                        </>
-                    )}
-                </button>
-                {error && <div className="error-message">{error}</div>}
-                {success && <div className="success-message">{success}</div>}
+                <div className="logout-btn-wrapper">
+                    <button className="logout-btn" onClick={handleLogout}>
+                        <FaSignOutAlt /> Log Out
+                    </button>
+                </div>
             </div>
 
             {/* Avatar Selection Modal */}
@@ -421,11 +455,9 @@ const Profile = () => {
                                 <FaTimes />
                             </button>
                         </div>
-
                         <div className="modal-body">
                             <div className="form-section">
                                 <label>Choose your appearance</label>
-
                                 <div className="avatar-category-tabs">
                                     {CATEGORIES.map(cat => (
                                         <button
@@ -437,7 +469,6 @@ const Profile = () => {
                                         </button>
                                     ))}
                                 </div>
-
                                 <div className="avatar-grid">
                                     {profileOptions.avatars.filter(a => a.category === selectedAvatarCategory).length > 0 ? (
                                         profileOptions.avatars.filter(a => a.category === selectedAvatarCategory).map(avatar => (
@@ -451,10 +482,7 @@ const Profile = () => {
                                                         src={avatar.image}
                                                         alt={avatar.name}
                                                         className="avatar-image"
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                            e.target.nextSibling.style.display = 'block';
-                                                        }}
+                                                        onError={(e) => { e.target.style.display = 'none'; }}
                                                     />
                                                 ) : null}
                                                 <span
@@ -471,25 +499,13 @@ const Profile = () => {
                                 </div>
                             </div>
                         </div>
-
                         <div className="modal-footer">
-                            <button className="cancel-btn" onClick={() => setIsEditingAvatar(false)}>
-                                Cancel
-                            </button>
-                            <button className="save-btn" onClick={() => setIsEditingAvatar(false)}>
-                                Done
-                            </button>
+                            <button className="cancel-btn" onClick={() => setIsEditingAvatar(false)}>Cancel</button>
+                            <button className="save-btn"   onClick={() => setIsEditingAvatar(false)}>Done</button>
                         </div>
                     </div>
                 </div>
             )}
-
-            <div className="logout-btn-wrapper fade-in-up" style={{ animationDelay: '0.5s' }}>
-                <button className="logout-btn" onClick={handleLogout}>
-                    <FaSignOutAlt />
-                    Log Out
-                </button>
-            </div>
         </div>
     );
 };

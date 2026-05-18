@@ -1,19 +1,895 @@
-/* Enhanced Profile Styles */
+/* ============================================
+   BENTO GRID PROFILE REDESIGN
+   ============================================ */
 
-/* Profile Edit Modal */
-.profile-edit-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+/* ---- Bento Grid Layout ---- */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(140px, auto);
+    gap: 16px;
+    animation: bentoFadeIn 0.5s ease-out;
+    margin-bottom: 24px;
 }
+
+@keyframes bentoFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Base Bento Card ---- */
+.bento-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.bento-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.bento-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* ---- Grid Placement ---- */
+.bento-avatar    { grid-column: span 2; grid-row: span 2; }
+.bento-info      { grid-column: span 2; grid-row: span 1; }
+.bento-bio       { grid-column: span 2; grid-row: span 2; }
+.bento-mood      { grid-column: span 1; grid-row: span 1; }
+.bento-privacy   { grid-column: span 1; grid-row: span 1; }
+.bento-interests { grid-column: span 2; grid-row: span 1; }
+.bento-contact   { grid-column: span 2; grid-row: span 1; }
+
+/* ---- Avatar Card ---- */
+.bento-avatar {
+    background: linear-gradient(145deg, rgba(42, 157, 143, 0.15) 0%, rgba(38, 70, 83, 0.2) 100%);
+    border-color: rgba(42, 157, 143, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.bento-avatar:hover {
+    border-color: rgba(42, 157, 143, 0.45);
+    box-shadow: 0 12px 40px rgba(42, 157, 143, 0.15);
+}
+
+.profile-avatar-ring {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #2a9d8f, #264653);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-avatar-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.profile-avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-avatar-emoji {
+    font-size: 3rem;
+    color: #2a9d8f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bento-avatar-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.bento-avatar-sub {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    margin: 0;
+}
+
+.change-avatar-btn {
+    background: rgba(42, 157, 143, 0.15);
+    color: #2a9d8f;
+    border: 1px solid rgba(42, 157, 143, 0.35);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.3px;
+}
+
+.change-avatar-btn:hover {
+    background: rgba(42, 157, 143, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(42, 157, 143, 0.2);
+}
+
+/* ---- Card Section Headers ---- */
+.bento-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin: 0 0 14px 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.bento-label svg, .bento-label .label-icon {
+    color: #2a9d8f;
+    font-size: 0.85rem;
+}
+
+/* ---- Basic Info Card ---- */
+.bento-info {
+    background: rgba(255,255,255,0.03);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.info-item label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.45);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-input,
+.info-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.info-input:focus,
+.info-select:focus {
+    outline: none;
+    border-color: rgba(42, 157, 143, 0.6);
+    background: rgba(42, 157, 143, 0.06);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+}
+
+.info-input::placeholder {
+    color: rgba(255,255,255,0.2);
+}
+
+.info-select option {
+    background: #111;
+    color: #fff;
+}
+
+/* ---- Bio Card ---- */
+.bento-bio {
+    background: rgba(255,255,255,0.03);
+}
+
+.bio-textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    resize: none;
+    height: calc(100% - 40px);
+    min-height: 120px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.bio-textarea:focus {
+    outline: none;
+    border-color: rgba(42, 157, 143, 0.6);
+    background: rgba(42, 157, 143, 0.05);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+}
+
+.bio-textarea::placeholder {
+    color: rgba(255,255,255,0.2);
+}
+
+/* ---- Mood Card ---- */
+.bento-mood {
+    background: linear-gradient(145deg, rgba(244, 162, 97, 0.1) 0%, rgba(231, 111, 81, 0.08) 100%);
+    border-color: rgba(244, 162, 97, 0.2);
+}
+
+.bento-mood:hover {
+    border-color: rgba(244, 162, 97, 0.35);
+    box-shadow: 0 12px 40px rgba(244, 162, 97, 0.1);
+}
+
+.color-options-bento {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.color-option-bento {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.03);
+    transition: all 0.18s ease;
+    text-align: left;
+}
+
+.color-option-bento:hover {
+    background: rgba(255,255,255,0.07);
+    color: #fff;
+}
+
+.color-option-bento.selected {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+    color: #fff;
+}
+
+.color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+}
+
+/* ---- Privacy / Toggles Card ---- */
+.bento-privacy {
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+}
+
+.mini-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.mini-toggle-label {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mini-toggle-label svg {
+    color: rgba(255,255,255,0.35);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+}
+
+.toggle-switch.active {
+    background: #2a9d8f;
+}
+
+.toggle-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-switch.active .toggle-knob {
+    transform: translateX(18px);
+}
+
+/* ---- Interests Card ---- */
+.bento-interests {
+    background: rgba(255,255,255,0.03);
+}
+
+.interests-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.interest-tag {
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.interest-tag:hover {
+    border-color: rgba(42,157,143,0.5);
+    color: rgba(255,255,255,0.85);
+}
+
+.interest-tag.selected {
+    border-color: #2a9d8f;
+    background: rgba(42, 157, 143, 0.15);
+    color: #2a9d8f;
+    font-weight: 600;
+}
+
+/* ---- Contact Card ---- */
+.bento-contact {
+    background: rgba(255,255,255,0.03);
+}
+
+/* ---- Profile Actions Row ---- */
+.profile-actions-bento {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 4px;
+}
+
+.save-profile-btn {
+    background: linear-gradient(135deg, #2a9d8f, #264653);
+    color: white;
+    border: none;
+    padding: 13px 30px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(42, 157, 143, 0.25);
+    font-family: inherit;
+}
+
+.save-profile-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(42, 157, 143, 0.4);
+}
+
+.save-profile-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.logout-btn-wrapper {
+    display: flex;
+}
+
+.logout-btn {
+    background: rgba(230, 57, 70, 0.08);
+    color: #e63946;
+    border: 1px solid rgba(230, 57, 70, 0.25);
+    padding: 13px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.logout-btn:hover {
+    background: rgba(230, 57, 70, 0.18);
+    border-color: rgba(230, 57, 70, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ---- Messages ---- */
+.error-message,
+.success-message {
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.success-message {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* ---- Profile Edit Modal ---- */
+.profile-edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: modalBackdropIn 0.2s ease;
+}
+
+@keyframes modalBackdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.profile-edit-modal .modal-content {
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    max-width: 580px;
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    animation: modalSlideIn 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.profile-edit-modal .modal-content::-webkit-scrollbar { width: 5px; }
+.profile-edit-modal .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.close-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 7px 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.close-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 18px 24px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ---- Avatar Tabs in Modal ---- */
+.form-section {
+    margin-bottom: 22px;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+}
+
+.avatar-category-tabs {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    scrollbar-width: none;
+}
+
+.avatar-category-tabs::-webkit-scrollbar { display: none; }
+
+.category-tab {
+    padding: 7px 15px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.category-tab:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.category-tab.active {
+    background: #2a9d8f;
+    color: white;
+    border-color: #2a9d8f;
+    box-shadow: 0 4px 14px rgba(42, 157, 143, 0.3);
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.avatar-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.avatar-option:hover {
+    border-color: rgba(42,157,143,0.5);
+    transform: translateY(-2px);
+    background: rgba(42,157,143,0.06);
+}
+
+.avatar-option.selected {
+    border-color: #2a9d8f;
+    background: rgba(42, 157, 143, 0.12);
+    box-shadow: 0 0 0 2px rgba(42, 157, 143, 0.2);
+}
+
+.avatar-image {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-emoji {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.no-options {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px dashed rgba(255,255,255,0.1);
+    font-size: 0.9rem;
+}
+
+/* Modal action buttons */
+.save-btn {
+    background: #2a9d8f;
+    color: white;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.save-btn:hover:not(:disabled) {
+    background: #238c7e;
+    transform: translateY(-1px);
+}
+
+.cancel-btn {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.cancel-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+/* ---- Guest Page ---- */
+.guest-login-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.guest-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(42, 157, 143, 0.1);
+    border: 1px solid rgba(42, 157, 143, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2a9d8f;
+}
+
+.guest-login-card h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.guest-login-card p {
+    color: rgba(255,255,255,0.5);
+    max-width: 450px;
+    margin: 0;
+    line-height: 1.7;
+}
+
+.profile-login-btn {
+    background: linear-gradient(135deg, #2a9d8f, #264653);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.22s ease;
+    box-shadow: 0 4px 20px rgba(42, 157, 143, 0.25);
+    font-family: inherit;
+}
+
+.profile-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(42, 157, 143, 0.4);
+}
+
+.settings-section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 24px;
+    padding: 24px;
+    position: relative;
+}
+
+.settings-section.disabled {
+    overflow: hidden;
+}
+
+.settings-section h3 {
+    font-size: 1.1rem;
+    color: white;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.setting-item:last-child { border-bottom: none; }
+
+.setting-info h4 {
+    margin: 0;
+    color: white;
+    font-size: 1rem;
+}
+
+.overlay-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255,255,255,0.5);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 900px) {
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .bento-avatar    { grid-column: span 2; grid-row: span 1; flex-direction: row; text-align: left; justify-content: flex-start; }
+    .bento-info      { grid-column: span 2; }
+    .bento-bio       { grid-column: span 2; grid-row: span 1; }
+    .bento-mood      { grid-column: span 1; }
+    .bento-privacy   { grid-column: span 1; }
+    .bento-interests { grid-column: span 2; }
+    .bento-contact   { grid-column: span 2; }
+}
+
+@media (max-width: 560px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .bento-avatar,
+    .bento-info,
+    .bento-bio,
+    .bento-mood,
+    .bento-privacy,
+    .bento-interests,
+    .bento-contact {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+    .bento-avatar { flex-direction: column; text-align: center; align-items: center; }
+
+    .info-grid { grid-template-columns: 1fr; }
+
+    .avatar-grid { grid-template-columns: repeat(4, 1fr); }
+
+    .profile-actions-bento { flex-direction: column-reverse; align-items: stretch; }
+    .save-profile-btn, .logout-btn { justify-content: center; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+    animation: fadeIn 0.4s ease-out;
+}
+
 
 .profile-edit-modal .modal-content {
   background: var(--bg-primary);

@@ -463,7 +463,7 @@ const Chat = () => {
         <div style={{ textAlign: 'center', padding: '20px' }}>
           Loading chatbot...
         </div>
-      )}
+      )}     
 
       {/* Current Mentor Identity Header */}
       <div className="active-mentor-header">

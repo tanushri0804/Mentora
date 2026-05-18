@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import './MoodTracker.css';
+import { moodService } from '../services/moodService';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // ─── QUIZ ──────────────────────────────────────────────────────────────────
 const QUESTIONS = [
@@ -549,7 +552,7 @@ const MemoryMatch = ({ onDone }) => {
           </p>
           <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
             <button className="activity-btn-outline" onClick={() => { setCards(shuffle()); setMoves(0); setSelected([]); }}>Play Again</button>
-            <button className="activity-btn" onClick={onDone}>Continue ✓</button>
+            <button className="activity-btn" onClick={onDone}>Continue</button>
           </div>
         </div>
       )}
@@ -559,16 +562,34 @@ const MemoryMatch = ({ onDone }) => {
 
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────
 const MoodTracker = () => {
+  const navigate = useNavigate();
+  const { isGuest } = useAuth();
 
-  const [stage, setStage] = useState("quiz"); // quiz | result | plan | complete
+  const [stage, setStage] = useState("welcome"); // welcome | quiz | result | plan | complete
   const [qIdx, setQIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [moodLevel, setMoodLevel] = useState(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [stepDone, setStepDone] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState([]); // Track actual answers
 
   const handleAnswer = (s) => {
     const newScore = score + s;
+    const currentQuestion = QUESTIONS[qIdx];
+    const selectedOption = currentQuestion.options.find(opt => opt.score === s);
+    
+    // Store the actual answer
+    const newAnswer = {
+      question: currentQuestion.q,
+      answer: selectedOption ? selectedOption.text : 'Not answered',
+      score: s
+    };
+    
+    setQuizAnswers([...quizAnswers, newAnswer]);
+    
     if (qIdx < QUESTIONS.length - 1) {
       setScore(newScore);
       setQIdx(qIdx + 1);
@@ -576,6 +597,7 @@ const MoodTracker = () => {
       const level = getMoodLevel(newScore + s);
       setMoodLevel(level);
       setStage("result");
+      setScore(newScore + s);
     }
   };
 
@@ -586,7 +608,78 @@ const MoodTracker = () => {
     else setStage("complete");
   };
 
-  const restart = () => { setStage("quiz"); setQIdx(0); setScore(0); setMoodLevel(null); setStepIdx(0); setStepDone(false); };
+  const restart = () => { 
+    setStage("welcome"); 
+    setQIdx(0); 
+    setScore(0); 
+    setMoodLevel(null); 
+    setStepIdx(0); 
+    setStepDone(false); 
+    setSaveError(null);
+    setSaveSuccess(false);
+    setQuizAnswers([]); // Clear tracked answers
+  };
+
+  const saveMoodEntry = async () => {
+    if (!moodLevel || isSaving) return;
+    
+    // Check if user is in guest mode
+    if (isGuest) {
+      setSaveError('Please login to save mood entries');
+      return;
+    }
+    
+    setIsSaving(true);
+    setSaveError(null);
+    
+    try {
+      // Convert score to intensity (1-10), ensuring it stays within bounds
+      const rawIntensity = (score / 20) * 10;
+      const intensity = Math.max(1, Math.min(10, Math.round(rawIntensity)));
+      
+      console.log('=== DEBUG: MoodTracker Save ===');
+      console.log('Score:', score);
+      console.log('Raw intensity calculation:', `(score / 20) * 10 = (${score} / 20) * 10 = ${rawIntensity}`);
+      console.log('Rounded intensity:', intensity);
+      console.log('MoodLevel:', moodLevel);
+      console.log('Intensity validation check:', intensity >= 1 && intensity <= 10 ? 'PASS' : 'FAIL');
+      
+      // Get the plan - ensure it's available
+      const currentPlan = PLANS[moodLevel] || [];
+      console.log('Plan length:', currentPlan.length);
+      
+      // Create detailed exercise data
+      const detailedData = {
+        quizAnswers: quizAnswers || [],
+        activitiesPlan: currentPlan,
+        scoreBreakdown: {
+          totalScore: score,
+          maxScore: 20,
+          questionCount: QUESTIONS.length
+        }
+      };
+
+      const moodData = {
+        mood: moodLevel,
+        intensity,
+        notes: `Completed ${currentPlan.length}-step mood exercise. Score: ${score}/20`,
+        exerciseDetails: JSON.stringify(detailedData)
+      };
+      
+      console.log('Final mood data:', moodData);
+      
+      await moodService.createMoodEntry(moodData);
+      setSaveSuccess(true);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error saving mood entry:', error);
+      setSaveError(error.message || 'Failed to save mood entry');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const meta = moodLevel ? MOOD_META[moodLevel] : null;
   const plan = moodLevel ? PLANS[moodLevel] : [];
@@ -608,12 +701,112 @@ const MoodTracker = () => {
     }
   };
 
+  // WELCOME STAGE
+  if (stage === "welcome") {
+    return (
+      <div className="mood-page">
+        <div className="welcome-dashboard">
+
+          {/* Hero */}
+          <div className="welcome-hero">
+            <span className="welcome-hero-emoji">🌿</span>
+            <h1>How are you feeling?</h1>
+            <p>Take a moment to check in with yourself</p>
+          </div>
+
+          {/* Main Actions (Grid) */}
+          <div className="custom-cards-grid">
+            <button className="custom-card card-green" onClick={() => setStage("quiz")}>
+              <div className="card-badge">🎯</div>
+              <div className="card-content">
+                <div className="card-title">Daily</div>
+                <div className="card-subtitle">Check-In</div>
+              </div>
+            </button>
+
+            <button className="custom-card card-pink" onClick={() => navigate('/chat/mood-history')}>
+              <div className="card-badge">📊</div>
+              <div className="card-content">
+                <div className="card-title">View</div>
+                <div className="card-subtitle">History</div>
+              </div>
+            </button>
+
+            <button className="custom-card card-white-green" onClick={() => navigate('/chat')}>
+              <div className="card-badge">💬</div>
+              <div className="card-content">
+                <div className="card-title">Chat with</div>
+                <div className="card-subtitle">Companion</div>
+              </div>
+            </button>
+
+            <button className="custom-card card-white-pink" onClick={() => setStage("games")}>
+              <div className="card-badge">🎮</div>
+              <div className="card-content">
+                <div className="card-title">Play</div>
+                <div className="card-subtitle">Quick Games</div>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // ── GAMES MENU ──
+  if (stage === "games") {
+    return (
+      <div className="mood-page">
+        <div className="welcome-dashboard">
+          <button className="back-btn" onClick={() => setStage("welcome")}>← Back</button>
+          <div className="welcome-hero" style={{ paddingTop: '0.5rem' }}>
+            <span className="welcome-hero-emoji">🎮</span>
+            <h1>Quick Games</h1>
+            <p>Take a break and clear your mind</p>
+          </div>
+          <div className="welcome-games-grid">
+            <button className="welcome-game-card" onClick={() => { setMoodLevel("good"); setStage("plan"); setStepIdx(1); setStepDone(false); }}>
+              <span className="wgc-emoji">🎮</span>
+              <div className="wgc-info">
+                <h4>Tic Tac Toe</h4>
+                <p>Classic strategy</p>
+              </div>
+            </button>
+            <button className="welcome-game-card" onClick={() => { setMoodLevel("thriving"); setStage("plan"); setStepIdx(1); setStepDone(false); }}>
+              <span className="wgc-emoji">🃏</span>
+              <div className="wgc-info">
+                <h4>Memory Match</h4>
+                <p>Test your memory</p>
+              </div>
+            </button>
+            <button className="welcome-game-card" onClick={() => { setMoodLevel("thriving"); setStage("plan"); setStepIdx(0); setStepDone(false); }}>
+              <span className="wgc-emoji">🔤</span>
+              <div className="wgc-info">
+                <h4>Word Scramble</h4>
+                <p>Unscramble the words</p>
+              </div>
+            </button>
+            <button className="welcome-game-card" onClick={() => { setMoodLevel("okay"); setStage("plan"); setStepIdx(0); setStepDone(false); }}>
+              <span className="wgc-emoji">🫁</span>
+              <div className="wgc-info">
+                <h4>Breathing</h4>
+                <p>Relax & focus</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── QUIZ ──
   if (stage === "quiz") {
     const q = QUESTIONS[qIdx];
     return (
       <div className="mood-page">
         <div className="mood-quiz-wrap">
+          <button className="back-btn" onClick={restart}>← Back</button>
           <div className="quiz-progress-bar">
             <div className="quiz-progress-fill" style={{ width: `${((qIdx) / QUESTIONS.length) * 100}%` }} />
           </div>
@@ -635,6 +828,7 @@ const MoodTracker = () => {
   if (stage === "result") {
     return (
       <div className="mood-page">
+        <button className="back-btn" onClick={restart}>← Back</button>
         <div className="result-card" style={{ borderColor: meta.color, background: meta.bg }}>
           <div className="result-emoji">{meta.label.split(" ").pop()}</div>
           <h2 className="result-label" style={{ color: meta.color }}>{meta.label}</h2>
@@ -663,6 +857,7 @@ const MoodTracker = () => {
     return (
       <div className="mood-page">
         <div className="plan-page-wrap">
+          <button className="back-btn" onClick={restart}>← Back</button>
           {/* Step breadcrumb */}
           <div className="step-breadcrumb">
             {plan.map((s, i) => (
@@ -705,9 +900,83 @@ const MoodTracker = () => {
           <p>Mood: <strong style={{ color: meta.color }}>{meta.label}</strong></p>
           <p>Steps completed: <strong>{plan.length}</strong></p>
         </div>
-        <button className="start-plan-btn" style={{ background: meta.color }} onClick={restart}>
-          Check In Again
-        </button>
+        
+        {/* Save Status Messages */}
+        {saveSuccess && (
+          <div style={{ 
+            padding: "0.75rem", 
+            backgroundColor: "rgba(76, 175, 125, 0.1)", 
+            border: "1px solid #4caf7d", 
+            borderRadius: "8px", 
+            marginTop: "1rem",
+            textAlign: "center"
+          }}>
+            <p style={{ color: "#4caf7d", margin: 0 }}>Mood saved successfully! </p>
+          </div>
+        )}
+        
+        {saveError && (
+          <div style={{ 
+            padding: "0.75rem", 
+            backgroundColor: "rgba(224, 122, 95, 0.1)", 
+            border: "1px solid #e07a5f", 
+            borderRadius: "8px", 
+            marginTop: "1rem",
+            textAlign: "center"
+          }}>
+            <p style={{ color: "#e07a5f", margin: 0 }}>Error: {saveError}</p>
+          </div>
+        )}
+        
+        {/* Action Buttons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1.5rem" }}>
+          {isGuest ? (
+            <div style={{ textAlign: "center", padding: "1rem", backgroundColor: "rgba(255, 193, 7, 0.1)", borderRadius: "8px", border: "1px solid rgba(255, 193, 7, 0.3)" }}>
+              <p style={{ margin: "0 0 1rem 0", color: "#856404" }}>
+                Want to save your mood entries and track your progress over time?
+              </p>
+              <button 
+                className="start-plan-btn" 
+                onClick={() => navigate('/chat/profile')}
+                style={{ background: "#ffc107", color: "#000" }}
+              >
+                Login or Sign Up 
+              </button>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <button 
+                  className="start-plan-btn" 
+                  style={{ 
+                    background: meta.color,
+                    opacity: isSaving ? 0.7 : 1,
+                    cursor: isSaving ? "not-allowed" : "pointer"
+                  }} 
+                  onClick={saveMoodEntry}
+                  disabled={isSaving || saveSuccess}
+                >
+                  {isSaving ? "Saving..." : saveSuccess ? "Saved " : "Save Mood Entry"}
+                </button>
+                <button 
+                  className="retake-btn" 
+                  onClick={restart}
+                  style={{ flex: 1 }}
+                >
+                  Check In Again
+                </button>
+              </div>
+              
+              <button 
+                className="activity-btn-outline" 
+                onClick={() => navigate('/chat/mood-history')}
+                style={{ width: "100%" }}
+              >
+                View Mood History 
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
