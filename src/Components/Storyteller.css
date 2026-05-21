@@ -612,3 +612,194 @@
 .empty-state .create-story-btn {
     margin-top: 0;
 }
+
+/* --- New Premium Reader Styles --- */
+.story-reader-fullscreen {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg-dark);
+    animation: fadeIn 0.4s ease-out;
+}
+
+.story-reader-fullscreen::-webkit-scrollbar {
+    display: none;
+}
+
+.reader-hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.reader-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.reader-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 60%, var(--bg-dark) 100%);
+    z-index: 2;
+}
+
+.reader-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.reader-back-btn {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transition: var(--transition-smooth);
+}
+
+.reader-back-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.reader-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.reader-hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.reader-title {
+    font-size: 4rem;
+    font-weight: 800;
+    color: white;
+    margin: 1.5rem 0;
+    line-height: 1.1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.reader-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+}
+
+.reader-content-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem 1rem;
+    position: relative;
+    z-index: 10;
+    gap: 2rem;
+}
+
+.reader-content-container {
+    flex: 1;
+    max-width: 740px;
+    margin: 0;
+    padding: 0;
+}
+
+.premium-reader-body {
+    color: #f8f9fa;
+    font-size: 1.35rem;
+    line-height: 2.0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-weight: 300;
+    letter-spacing: 0.2px;
+}
+
+.premium-reader-body::first-letter {
+    font-size: 4.5rem;
+    font-weight: 700;
+    float: left;
+    line-height: 0.8;
+    margin-right: 0.8rem;
+    margin-top: 0.4rem;
+    color: #2a9d8f;
+    text-shadow: 0 2px 10px rgba(42, 157, 143, 0.3);
+}
+
+.side-nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+    margin-top: 2rem; /* align a bit lower than the top of paragraph */
+}
+
+.side-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.side-nav-btn:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+.page-indicator-container {
+    text-align: center;
+    margin-top: 4rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 2rem;
+}
+
+.reader-page-indicator {
+    color: var(--text-muted);
+    font-family: monospace;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+}

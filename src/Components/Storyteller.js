@@ -587,62 +587,78 @@ const Storyteller = () => {
     const isLastPage = readerPageIndex === readingStory.pages.length - 1;
 
     return (
-      <div className="storyteller-container">
-        <div className="story-page-container">
-          <button className="back-btn" onClick={closeReader}>
-            <FaTimes style={{ position: 'relative', top: '1px' }} />
-            Back to Stories
-          </button>
+      <div className="story-reader-fullscreen">
+        <div className="reader-hero-section">
+          <div className="reader-hero-bg" style={{ backgroundImage: `url(${readingStory.cover})` }}></div>
+          <div className="reader-hero-overlay"></div>
+          
+          <div className="reader-top-bar">
+            <button className="reader-back-btn" onClick={closeReader}>
+              <FaChevronLeft style={{ position: 'relative', top: '1px' }} />
+              Back to Stories
+            </button>
+            
+            {readingStory.author === '@you' && (
+              <div className="reader-actions">
+                <button className="action-btn" onClick={startEditing}>Edit</button>
+                <button className="action-btn delete-btn" onClick={() => handleDeleteStory(readingStory.id)}>Delete</button>
+              </div>
+            )}
+          </div>
 
-          <img src={readingStory.cover} alt="Cover" className="page-cover" />
-
-          <div className="reader-header">
+          <div className="reader-hero-content">
             <span
               className="reader-emotion"
               style={{
                 background: `${getEmotionDetails(readingStory.emotion).color}33`,
-                color: getEmotionDetails(readingStory.emotion).color
+                color: getEmotionDetails(readingStory.emotion).color,
+                marginBottom: '1rem',
+                display: 'inline-block'
               }}
             >
               {getEmotionDetails(readingStory.emotion).label}
             </span>
-            <h2>{readingStory.title}</h2>
-            <div className="reader-author" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Written by <strong>{readingStory.author}</strong> on {readingStory.date}</span>
-              {readingStory.author === '@you' && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button className="action-btn" onClick={startEditing}>Edit Story</button>
-                  <button className="action-btn delete-btn" onClick={() => handleDeleteStory(readingStory.id)}>Delete</button>
-                </div>
-              )}
+            <h2 className="reader-title">{readingStory.title}</h2>
+            <div className="reader-meta">
+              <span>Written by <strong>{readingStory.author}</strong></span>
+              <span>•</span>
+              <span>{readingStory.date}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="reader-content-wrapper">
+          <button
+            className="side-nav-btn"
+            onClick={() => setReaderPageIndex(prev => prev - 1)}
+            disabled={isFirstPage}
+          >
+            <FaChevronLeft size={24} />
+          </button>
+
+          <div className="reader-content-container">
+            <div className="premium-reader-body page-anim" key={readerPageIndex}>
+              {readingStory.pages[readerPageIndex]}
+            </div>
+
+            <div className="page-indicator-container">
+              <span className="reader-page-indicator">
+                {readerPageIndex + 1} / {readingStory.pages.length}
+              </span>
             </div>
           </div>
 
-          <div className="reader-body page-anim" key={readerPageIndex}>
-            {readingStory.pages[readerPageIndex]}
-          </div>
+          <button
+            className="side-nav-btn"
+            onClick={() => setReaderPageIndex(prev => prev + 1)}
+            disabled={isLastPage}
+          >
+            <FaChevronRight size={24} />
+          </button>
+        </div>
 
-          <div className="page-navigation">
-            <button
-              className="page-nav-btn"
-              onClick={() => setReaderPageIndex(prev => prev - 1)}
-              disabled={isFirstPage}
-            >
-              <FaChevronLeft /> Previous Page
-            </button>
-            <span className="page-indicator">
-              Page {readerPageIndex + 1} of {readingStory.pages.length}
-            </span>
-            <button
-              className="page-nav-btn"
-              onClick={() => setReaderPageIndex(prev => prev + 1)}
-              disabled={isLastPage}
-            >
-              Next Page <FaChevronRight />
-            </button>
-          </div>
-
-          {/* Comments Section */}
+        {/* Comments Section */}
+        <div style={{ maxWidth: '740px', margin: '0 auto', padding: '0 2rem 5rem 2rem' }}>
           <div className="comments-section">
             <h3>Community Support & Thoughts</h3>
             <div className="comments-list">
