@@ -288,68 +288,7 @@ const MoodHistory = () => {
                       </div>
                     )}
                     
-                    {/* Exercise Details Section */}
-                    {entry.exerciseDetails && (
-                      <div className="exercise-details-section">
-                        <button 
-                          onClick={() => toggleExpandedEntry(entry.id)}
-                          className="view-details-btn"
-                        >
-                          {expandedEntries.has(entry.id) ? 'Hide Details' : 'View Exercise Details'}
-                          <span className={`expand-icon ${expandedEntries.has(entry.id) ? 'expanded' : ''}`}>
-                            {expandedEntries.has(entry.id) ? '×' : '+'}
-                          </span>
-                        </button>
-                        
-                        {expandedEntries.has(entry.id) && (
-                          <div className="exercise-details">
-                            {(() => {
-                              const details = parseExerciseDetails(entry.exerciseDetails);
-                              if (!details) return <p>Details not available</p>;
-                              
-                              return (
-                                <div className="details-content">
-                                  {/* Score Breakdown */}
-                                  <div className="score-breakdown">
-                                    <h4>Exercise Score</h4>
-                                    <div className="score-info">
-                                      <span className="score-value">{details.scoreBreakdown.totalScore}/{details.scoreBreakdown.maxScore}</span>
-                                      <span className="score-label">points earned</span>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Quiz Answers */}
-                                  <div className="quiz-answers">
-                                    <h4>Your Quiz Answers</h4>
-                                    <div className="answers-list">
-                                      {details.quizAnswers.map((answer, index) => (
-                                        <div key={index} className="answer-item">
-                                          <div className="question-text">{answer.question}</div>
-                                          <div className="answer-text">{answer.answer}</div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Activities Plan */}
-                                  <div className="activities-plan">
-                                    <h4>Your Activities Plan</h4>
-                                    <div className="activities-list">
-                                      {details.activitiesPlan.map((activity, index) => (
-                                        <div key={index} className="activity-item">
-                                          <div className="activity-title">{activity.title}</div>
-                                          <div className="activity-description">{activity.description}</div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        )}
-                      </div>
-                    )}
+
                     
                     <div className="entry-actions">
                       <button 

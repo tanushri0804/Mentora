@@ -17,8 +17,7 @@ const DeleteChatModal = ({ isOpen, onClose, onConfirm, mentorName }) => {
         </div>
         
         <div className="delete-modal-content">
-          <p>Are you sure you want to delete all messages with <strong>{mentorName}</strong>?</p>
-          <p className="warning-text">This action cannot be undone and will permanently remove:</p>
+          <p>Are you sure you want to permanently delete all messages with <strong>{mentorName}</strong>? This action cannot be undone and will remove the entire conversation history.</p>
           <ul className="delete-list">
             <li>📝 All chat messages</li>
             <li>💭 Conversation history</li>

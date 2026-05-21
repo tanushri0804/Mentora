@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaCamera, FaFireAlt, FaRegComments, FaHeartbeat, FaSignOutAlt, FaBell, FaMoon, FaLock, FaSignInAlt, FaEdit, FaMapMarkerAlt, FaGlobe, FaPalette, FaSave, FaTimes } from 'react-icons/fa';
+import { FaUser, FaCamera, FaSignOutAlt, FaMoon, FaSignInAlt, FaMapMarkerAlt, FaGlobe, FaSave, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import './Profile.css';
 import './ProfileEnhanced.css';
@@ -19,9 +19,6 @@ const PREMIUM_AVATARS = CATEGORIES.flatMap(cat =>
 const Profile = () => {
     const navigate = useNavigate();
     const { isGuest, user, logout, token } = useAuth();
-    const [themeDark, setThemeDark] = useState(true);
-    const [notifications, setNotifications] = useState(true);
-    const [privateMode, setPrivateMode] = useState(false);
 
     // Profile editing states - simplified for inline editing
     const [isEditingAvatar, setIsEditingAvatar] = useState(false);
@@ -64,6 +61,7 @@ const Profile = () => {
             fetchProfileOptions();
             loadUserProfile();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, isGuest]);
 
     // Save profile data to localStorage whenever it changes
@@ -198,14 +196,7 @@ const Profile = () => {
         navigate('/login');
     };
 
-    const toggleInterest = (interest) => {
-        setProfileData(prev => ({
-            ...prev,
-            interests: prev.interests.includes(interest)
-                ? prev.interests.filter(i => i !== interest)
-                : [...prev.interests, interest]
-        }));
-    };
+
 
     if (isGuest) {
         return (
@@ -250,198 +241,144 @@ const Profile = () => {
                 <p>Manage your account and preferences</p>
             </header>
 
-            {/* Bento Grid */}
-            <div className="bento-grid">
-
-                {/* ── Avatar Card (2×2) ── */}
-                <div className="bento-card bento-avatar">
-                    <div className="profile-avatar-ring">
-                        <div className="profile-avatar-inner">
-                            {(() => {
-                                const selectedAvatar = profileOptions.avatars.find(a => a.id === profileData.avatar);
-                                return selectedAvatar?.image ? (
-                                    <img
-                                        src={selectedAvatar.image}
-                                        alt={selectedAvatar.name}
-                                        className="profile-avatar-image"
-                                        onError={(e) => {
-                                            e.target.style.display = 'none';
-                                        }}
-                                    />
-                                ) : (
-                                    <span className="profile-avatar-emoji"><FaUser /></span>
-                                );
-                            })()}
+            <div className="profile-layout-container">
+                {/* Left Column: Avatar & Quick Actions */}
+                <div className="profile-sidebar-card">
+                    <div className="profile-avatar-wrapper">
+                        <div className="profile-avatar-ring">
+                            <div className="profile-avatar-inner">
+                                {(() => {
+                                    const selectedAvatar = profileOptions.avatars.find(a => a.id === profileData.avatar);
+                                    return selectedAvatar?.image ? (
+                                        <img
+                                            src={selectedAvatar.image}
+                                            alt={selectedAvatar.name}
+                                            className="profile-avatar-image"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <span className="profile-avatar-emoji"><FaUser /></span>
+                                    );
+                                })()}
+                            </div>
                         </div>
+                        <button className="change-avatar-btn" onClick={() => setIsEditingAvatar(true)}>
+                            <FaCamera /> Change Avatar
+                        </button>
                     </div>
-                    <div>
-                        <p className="bento-avatar-name">
+
+                    <div className="profile-sidebar-info">
+                        <h2 className="profile-sidebar-name">
                             {profileData.displayName || user?.name || 'Your Name'}
-                        </p>
-                        <p className="bento-avatar-sub">
-                            {profileData.pronouns || 'Set your pronouns'}
-                        </p>
+                        </h2>
+                        <span className="profile-sidebar-pronouns">
+                            {profileData.pronouns || 'Set pronouns'}
+                        </span>
                     </div>
-                    <button className="change-avatar-btn" onClick={() => setIsEditingAvatar(true)}>
-                        <FaCamera /> Change Avatar
-                    </button>
+
+                    <div className="profile-sidebar-actions">
+                        <button className="logout-btn" onClick={handleLogout}>
+                            <FaSignOutAlt /> Log Out
+                        </button>
+                    </div>
                 </div>
 
-                {/* ── Basic Info Card (2×1) ── */}
-                <div className="bento-card bento-info">
-                    <p className="bento-label"><FaUser className="label-icon" /> Basic Info</p>
-                    <div className="info-grid">
-                        <div className="info-item">
-                            <label>Display Name</label>
-                            <input
-                                type="text"
-                                value={profileData.displayName}
-                                onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
-                                placeholder="How should we call you?"
-                                className="info-input"
-                            />
+                {/* Right Column: Settings Form */}
+                <div className="profile-form-card">
+                    {/* Section 1: Basic Info */}
+                    <div className="form-section-group">
+                        <h3 className="section-title">
+                            <FaUser className="section-title-icon" /> Basic Info
+                        </h3>
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label>Display Name</label>
+                                <input
+                                    type="text"
+                                    value={profileData.displayName}
+                                    onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
+                                    placeholder="How should we call you?"
+                                    className="profile-input"
+                                />
+                            </div>
+                            <div className="input-field">
+                                <label>Pronouns</label>
+                                <select
+                                    value={profileData.pronouns}
+                                    onChange={(e) => setProfileData(prev => ({ ...prev, pronouns: e.target.value }))}
+                                    className="profile-select"
+                                >
+                                    <option value="">Select pronouns</option>
+                                    {profileOptions.pronouns.map(pronoun => (
+                                        <option key={pronoun.value} value={pronoun.value}>
+                                            {pronoun.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
-                        <div className="info-item">
-                            <label>Pronouns</label>
-                            <select
-                                value={profileData.pronouns}
-                                onChange={(e) => setProfileData(prev => ({ ...prev, pronouns: e.target.value }))}
-                                className="info-select"
-                            >
-                                <option value="">Select pronouns</option>
-                                {profileOptions.pronouns.map(pronoun => (
-                                    <option key={pronoun.value} value={pronoun.value}>
-                                        {pronoun.label}
-                                    </option>
-                                ))}
-                            </select>
+                    </div>
+
+                    <div className="form-sections-row">
+                        {/* Section 2: About Me */}
+                        <div className="form-section-group">
+                            <h3 className="section-title">
+                                About Me
+                            </h3>
+                            <div className="input-field full-width">
+                                <textarea
+                                    value={profileData.bio}
+                                    onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                                    placeholder="Tell us a little about yourself…"
+                                    className="profile-textarea"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Section 3: Contact & Location */}
+                        <div className="form-section-group">
+                            <h3 className="section-title">
+                                Contact & Location
+                            </h3>
+                            <div className="inputs-column">
+                                <div className="input-field">
+                                    <label><FaMapMarkerAlt className="label-icon" /> Location</label>
+                                    <input
+                                        type="text"
+                                        value={profileData.location}
+                                        onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
+                                        placeholder="City, Country"
+                                        className="profile-input"
+                                    />
+                                </div>
+                                <div className="input-field">
+                                    <label><FaGlobe className="label-icon" /> Website</label>
+                                    <input
+                                        type="url"
+                                        value={profileData.website}
+                                        onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
+                                        placeholder="https://yourwebsite.com"
+                                        className="profile-input"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* ── Bio Card (2×2) ── */}
-                <div className="bento-card bento-bio">
-                    <p className="bento-label">About Me</p>
-                    <textarea
-                        value={profileData.bio}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                        placeholder="Tell us a little about yourself…"
-                        className="bio-textarea"
-                    />
-                </div>
-
-                {/* ── Mood Theme Card (1×1) ── */}
-                <div className="bento-card bento-mood">
-                    <p className="bento-label"><FaPalette className="label-icon" /> Mood Theme</p>
-                    <div className="color-options-bento">
-                        {profileOptions.moodColors.map(color => (
-                            <button
-                                key={color.value}
-                                className={`color-option-bento ${profileData.moodColor === color.value ? 'selected' : ''}`}
-                                onClick={() => setProfileData(prev => ({ ...prev, moodColor: color.value }))}
-                            >
-                                <span className="color-dot" style={{ backgroundColor: color.color }} />
-                                {color.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── Quick Settings Card (1×1) ── */}
-                <div className="bento-card bento-privacy">
-                    <p className="bento-label">Quick Settings</p>
-                    <div className="mini-toggle-row">
-                        <span className="mini-toggle-label"><FaMoon /> Dark Mode</span>
-                        <div
-                            className={`toggle-switch ${themeDark ? 'active' : ''}`}
-                            onClick={() => setThemeDark(p => !p)}
+                    {/* Form Actions (Save button & messages) */}
+                    <div className="profile-form-actions">
+                        <button
+                            className="save-profile-btn"
+                            onClick={handleSaveProfile}
+                            disabled={loading}
                         >
-                            <div className="toggle-knob" />
-                        </div>
+                            {loading ? 'Saving Changes…' : <><FaSave /> Save Changes</>}
+                        </button>
+                        {error && <div className="error-message">{error}</div>}
+                        {success && <div className="success-message">{success}</div>}
                     </div>
-                    <div className="mini-toggle-row">
-                        <span className="mini-toggle-label"><FaBell /> Notifications</span>
-                        <div
-                            className={`toggle-switch ${notifications ? 'active' : ''}`}
-                            onClick={() => setNotifications(p => !p)}
-                        >
-                            <div className="toggle-knob" />
-                        </div>
-                    </div>
-                    <div className="mini-toggle-row">
-                        <span className="mini-toggle-label"><FaLock /> Private</span>
-                        <div
-                            className={`toggle-switch ${privateMode ? 'active' : ''}`}
-                            onClick={() => setPrivateMode(p => !p)}
-                        >
-                            <div className="toggle-knob" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Interests Card (2×1) ── */}
-                <div className="bento-card bento-interests">
-                    <p className="bento-label"><FaHeartbeat className="label-icon" /> Interests</p>
-                    <div className="interests-grid">
-                        {profileOptions.interests.map(interest => (
-                            <button
-                                key={interest}
-                                type="button"
-                                className={`interest-tag ${profileData.interests.includes(interest) ? 'selected' : ''}`}
-                                onClick={() => toggleInterest(interest)}
-                            >
-                                {interest}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── Contact Card (2×1) ── */}
-                <div className="bento-card bento-contact">
-                    <p className="bento-label">Contact & Location</p>
-                    <div className="info-grid">
-                        <div className="info-item">
-                            <label><FaMapMarkerAlt /> Location</label>
-                            <input
-                                type="text"
-                                value={profileData.location}
-                                onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
-                                placeholder="City, Country"
-                                className="info-input"
-                            />
-                        </div>
-                        <div className="info-item">
-                            <label><FaGlobe /> Website</label>
-                            <input
-                                type="url"
-                                value={profileData.website}
-                                onChange={(e) => setProfileData(prev => ({ ...prev, website: e.target.value }))}
-                                placeholder="https://yourwebsite.com"
-                                className="info-input"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-            </div>{/* end bento-grid */}
-
-            {/* ── Actions Row ── */}
-            <div className="profile-actions-bento">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                    <button
-                        className="save-profile-btn"
-                        onClick={handleSaveProfile}
-                        disabled={loading}
-                    >
-                        {loading ? 'Saving…' : <><FaSave /> Save Profile</>}
-                    </button>
-                    {error   && <div className="error-message">{error}</div>}
-                    {success && <div className="success-message">{success}</div>}
-                </div>
-                <div className="logout-btn-wrapper">
-                    <button className="logout-btn" onClick={handleLogout}>
-                        <FaSignOutAlt /> Log Out
-                    </button>
                 </div>
             </div>
 

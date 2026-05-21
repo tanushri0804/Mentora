@@ -594,10 +594,10 @@ const MoodTracker = () => {
       setScore(newScore);
       setQIdx(qIdx + 1);
     } else {
-      const level = getMoodLevel(newScore + s);
+      const level = getMoodLevel(newScore);
       setMoodLevel(level);
       setStage("result");
-      setScore(newScore + s);
+      setScore(newScore);
     }
   };
 

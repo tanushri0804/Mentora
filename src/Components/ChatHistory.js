@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTrash, FaEdit, FaClock, FaComment } from 'react-icons/fa';
 import './ChatHistory.css';
 
@@ -8,7 +7,6 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
   const [loading, setLoading] = useState(true);
   const [editingSession, setEditingSession] = useState(null);
   const [newTitle, setNewTitle] = useState('');
-  const navigate = useNavigate();
 
   // Define functions before using them
   const loadChatSessions = useCallback(async () => {
@@ -66,8 +64,6 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
           onSelectSession(data.data.id);
           // Close history panel
           onClose();
-          // Navigate to chat with the new session
-          navigate(`/chat/${mentorName}?sessionId=${data.data.id}`);
         }
       }
     } catch (error) {
@@ -134,7 +130,6 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
   const selectChatSession = (session) => {
     onSelectSession(session.id);
     onClose();
-    navigate(`/chat/${mentorName}?sessionId=${session.id}`);
   };
 
   const formatDate = (dateString) => {

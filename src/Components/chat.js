@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import './Toast.css';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { FaPaperPlane, FaEllipsisH, FaPlus, FaHistory, FaUserCog, FaThumbtack, FaUserCircle, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaArrowLeft, FaRobot, FaComment, FaTrash } from 'react-icons/fa';
 import moodAvtar from '../assets/moodAvtar.png';
@@ -46,6 +47,15 @@ const Chat = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  // Auto-dismiss toast after 3 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [sessionId, setSessionId] = useState(currentSessionId);
   const messagesEndRef = useRef(null);
@@ -152,6 +162,13 @@ const Chat = () => {
     }
   }, [aiId, isChatbotRoute]);
 
+  // Sync sessionId and reset chat history when URL session ID or companion changes
+  useEffect(() => {
+    console.log("URL/Route changed. Syncing session:", currentSessionId, "aiId:", aiId);
+    setSessionId(currentSessionId);
+    setChatHistory([]);
+  }, [currentSessionId, aiId]);
+
   useEffect(() => {
     // Only initialize chat when we have the chatbot data AND no history
     if (chatHistory.length === 0 && currentChatbot && !loading) {
@@ -160,7 +177,7 @@ const Chat = () => {
       const initializeChat = async () => {
         try {
           // First, try to load conversation history from session if sessionId is provided
-          if (sessionId && chatbotId) {
+          if (sessionId) {
             try {
               const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}/messages`, {
                 headers: {
@@ -187,9 +204,10 @@ const Chat = () => {
           }
 
           // If no specific session, try to load most recent session for this chatbot
-          if (!sessionId && chatbotId) {
+          const targetCompanionId = chatbotId || currentChatbot?.id;
+          if (!sessionId && targetCompanionId) {
             try {
-              const response = await fetch(`http://localhost:5000/api/sessions/ai/${chatbotId}`, {
+              const response = await fetch(`http://localhost:5000/api/sessions/ai/${targetCompanionId}`, {
                 headers: {
                   'Authorization': `Bearer ${localStorage.getItem('mentora_token')}`
                 }
@@ -219,6 +237,13 @@ const Chat = () => {
                       }));
                       setChatHistory(formattedHistory);
                       setSessionId(mostRecentSession.id);
+                      
+                      // Sync URL search params
+                      if (isCustomChatbot) {
+                        navigate(`/chat/chatbot/${chatbotId}?sessionId=${mostRecentSession.id}`, { replace: true });
+                      } else {
+                        navigate(`/chat/${aiId}?sessionId=${mostRecentSession.id}`, { replace: true });
+                      }
                       return;
                     }
                   }
@@ -266,6 +291,11 @@ const Chat = () => {
             // Update session ID if returned from API
             if (data.sessionId && !sessionId) {
               setSessionId(data.sessionId);
+              if (isCustomChatbot) {
+                navigate(`/chat/chatbot/${chatbotId}?sessionId=${data.sessionId}`, { replace: true });
+              } else {
+                navigate(`/chat/${aiId}?sessionId=${data.sessionId}`, { replace: true });
+              }
             }
           } else {
             const greeting = isCustomChatbot 
@@ -290,7 +320,7 @@ const Chat = () => {
 
       initializeChat();
     }
-  }, [currentChatbot, loading, chatHistory.length, isCustomChatbot, selectedMentor, chatbotId, sessionId]);
+  }, [currentChatbot, loading, chatHistory.length, isCustomChatbot, selectedMentor, chatbotId, sessionId, navigate, aiId]);
 
   const handleUserInput = useCallback(async () => {
     if (!userInput.trim() || (!selectedMentor && !currentChatbot)) return;
@@ -329,6 +359,11 @@ const Chat = () => {
         // Update session ID if returned from API
         if (data.sessionId && !sessionId) {
           setSessionId(data.sessionId);
+          if (isCustomChatbot) {
+            navigate(`/chat/chatbot/${chatbotId}?sessionId=${data.sessionId}`, { replace: true });
+          } else {
+            navigate(`/chat/${aiId}?sessionId=${data.sessionId}`, { replace: true });
+          }
         }
         
         // Refresh chatbot data to get updated interaction count
@@ -351,19 +386,53 @@ const Chat = () => {
         text: "I'm having trouble connecting right now. Please check your connection and try again." 
       }]);
     }
-  }, [userInput, chatHistory, selectedMentor, currentChatbot, isCustomChatbot, chatbotId, sessionId, loadChatbotData, loadOfficialChatbotData]);
+  }, [userInput, chatHistory, selectedMentor, currentChatbot, isCustomChatbot, chatbotId, sessionId, loadChatbotData, loadOfficialChatbotData, aiId, navigate]);
 
-  const handleNewChat = useCallback(() => {
-    // Clear current chat history
-    setChatHistory([]);
-    setSessionId(null);
-    // Navigate to new chat without session ID
-    if (isCustomChatbot) {
-      navigate(`/chat/chatbot/${chatbotId}`);
-    } else {
-      navigate(`/chat/${aiId}`);
+  const handleNewChat = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('mentora_token');
+      const targetCompanionId = chatbotId || currentChatbot?.id;
+      
+      if (!targetCompanionId) {
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Creating new session for companion:', targetCompanionId);
+      const response = await fetch('http://localhost:5000/api/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          aiId: targetCompanionId,
+          title: 'New Chat'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log('Successfully created new session:', data.data.id);
+          setChatHistory([]);
+          setSessionId(data.data.id);
+          setShowSidebar(false);
+          
+          if (isCustomChatbot) {
+            navigate(`/chat/chatbot/${chatbotId}?sessionId=${data.data.id}`);
+          } else {
+            navigate(`/chat/${aiId}?sessionId=${data.data.id}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to create new chat session from sidebar:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [isCustomChatbot, chatbotId, aiId, navigate]);
+  }, [isCustomChatbot, chatbotId, aiId, currentChatbot, navigate]);
 
   const handleHistoryClick = useCallback(() => {
     setShowChatHistory(true);
@@ -387,22 +456,46 @@ const Chat = () => {
     const mentorName = currentChatbot?.name || selectedMentor;
     
     try {
-      const chatbotIdToDelete = isCustomChatbot ? chatbotId : aiId;
-      await chatbotService.clearChatHistory(chatbotIdToDelete);
+      if (sessionId) {
+        // Delete the specific active session
+        const token = localStorage.getItem('mentora_token');
+        const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete session');
+        }
+      } else {
+        // If there's no sessionId, clear all history with this companion
+        const chatbotIdToDelete = isCustomChatbot ? chatbotId : aiId;
+        await chatbotService.clearChatHistory(chatbotIdToDelete);
+      }
       
-      // Clear current chat history
+      // Clear current chat history and reset session ID
       setChatHistory([]);
       setSessionId(null);
       setShowDeleteModal(false);
-      
-      // Show success message
-      alert(`Chat history with ${mentorName} has been deleted successfully.`);
-      
+      setShowSidebar(false);
+
+      // Navigate to base chatbot route to start a clean slate
+      if (isCustomChatbot) {
+        navigate(`/chat/chatbot/${chatbotId}`);
+      } else {
+        navigate(`/chat/${aiId}`);
+      }
+
+      // Show success toast
+      setToast({ msg: `Chat session with ${mentorName} has been deleted successfully.`, type: 'success' });
+
     } catch (error) {
       console.error('Delete chat error:', error);
-      alert('Failed to delete chat history. Please try again.');
+      setToast({ msg: 'Failed to delete chat session. Please try again.', type: 'error' });
     }
-  }, [currentChatbot, selectedMentor, isCustomChatbot, chatbotId, aiId]);
+  }, [currentChatbot, selectedMentor, isCustomChatbot, chatbotId, aiId, sessionId, navigate]);
 
   const fontSizeMap = {
     small: '13px',
@@ -417,6 +510,10 @@ const Chat = () => {
   };
 
   return (
+    <>
+      {toast && (
+        <div className={`toast ${toast.type}`}> {toast.msg} </div>
+      )}
     <div className="chat-room-container" style={{ backgroundColor: theme.chatBackground }}>
       {/* Dynamic Background Image Layer */}
       {theme.backgroundImage && (
@@ -616,7 +713,7 @@ const Chat = () => {
         isOpen={showCustomizer}
         onClose={() => setShowCustomizer(false)}
       />
-    </div>
+    </div></>
   );
 };
 
