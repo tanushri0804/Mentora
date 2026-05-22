@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaEnvelope, FaLock, FaUser, FaGoogle, FaArrowRight, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaUser, FaGoogle, FaArrowRight, FaEye, FaEyeSlash, FaHome } from 'react-icons/fa';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -91,6 +91,10 @@ const LoginPage = () => {
         ))}
       </div>
 
+      <button className="auth-home-button" type="button" onClick={() => navigate('/')}
+        aria-label="Go to home">
+        <FaHome />
+      </button>
       <div className={`auth-card-wrapper ${isSignUp ? 'sign-up-mode' : ''}`}>
         <div className="forms-container">
           <div className="signin-signup">
