@@ -34,52 +34,104 @@ const EMOTIONS = [
 const DEFAULT_STORIES = [
   {
     id: 1,
-    title: 'Finding Light in the Forest',
+    title: 'Maybe You’re Not Behind',
     author: '@mentora_official',
-    emotion: 'hopeful',
+    emotion: 'neutral',
     cover: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&q=80&w=800',
-    description: 'A short reflection on how taking a walk in the forest can help relieve the burdens of everyday life.',
+    description: 'A reflection on letting go of societal timelines and finding peace in your own unique journey.',
     pages: [
-      "It was a serene morning in the heart of the forest. The sunlight pierced through the canopy... I had been feeling so overwhelmed the last few weeks, carrying a heavy weight in my chest.",
-      "But listening to the crunch of leaves beneath my boots, I finally took a deep breath. Nature has this incredible way of making our problems feel small while wrapping us in an immense sense of belonging.",
-      "If you're struggling today, please take five minutes to step outside and just watch the sky. It truly helps."
+      "Maybe your life isn’t falling apart.\nMaybe it’s just unfolding differently than you imagined.",
+      "We spend so much time comparing timelines that we forget every person is fighting a battle we cannot see. Someone may look successful but feel empty inside. Someone may look lost but secretly be healing.",
+      "Growth is strange because it rarely feels like progress while it’s happening.\n\nSometimes growth looks like:\n* choosing rest instead of burnout\n* crying instead of pretending\n* starting again after failing\n* surviving days you thought would break you",
+      "You do not need to become perfect overnight.\n\nYou do not need to have all the answers right now.\n\nLife is not a race between you and everyone else online.",
+      "Maybe this season of your life is not about proving anything.\nMaybe it’s about learning how to breathe again.\nHow to trust yourself again.\nHow to live without constantly punishing yourself.",
+      "And maybe being “better” does not mean becoming someone new.\nMaybe it means finally being kinder to the person you already are."
     ],
-    comments: [
-      { id: 1, author: '@nature_lover', text: 'This is so true! I always feel better after a hike.', date: 'March 2, 2026' }
-    ],
-    date: 'March 1, 2026'
+    comments: [],
+    date: 'May 20, 2026'
   },
   {
     id: 2,
-    title: 'The Weight of the Mountains',
-    author: '@mountain_climber',
-    emotion: 'joy',
+    title: 'Healing Is Not Always Beautiful',
+    author: '@mentora_official',
+    emotion: 'sad',
     cover: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&q=80&w=800',
-    description: 'Sometimes you have to physically push your body to exhaust your anxious mind. A story about climbing to find peace.',
+    description: 'An honest look at the messy, non-linear reality of emotional healing.',
     pages: [
-      "Climbing those rocky trails, I found not just breathtaking views but also a piece of peace I thought I lost. Sometimes you have to physically push your body to exhaust your anxious mind.",
-      "The view from the top wasn't what cured me, it was the realization that I had the strength to climb it all along."
+      "Healing is not always soft music, morning routines, and peaceful sunsets.\n\nSometimes healing looks messy.",
+      "It looks like losing motivation.\nLike isolating yourself because you’re overwhelmed.\nLike trying to explain feelings you don’t even understand yourself.",
+      "Some days you will feel like you’re making progress.\nOther days you will feel like you’re back at the beginning.\n\nThat does not mean you failed.",
+      "Human emotions are not linear.\nYou are allowed to have hard days without believing your entire life is hopeless.",
+      "Please remember this:\n\nA bad chapter is not the whole story.\nA difficult season is not your forever.\nAnd needing help does not make you weak.",
+      "You are still growing, even on the days when growth feels invisible."
     ],
-    comments: [
-      { id: 2, author: '@fitness_freak', text: 'Nothing beats that feeling at the summit.', date: 'March 3, 2026' }
-    ],
-    date: 'March 3, 2026'
+    comments: [],
+    date: 'May 21, 2026'
   },
   {
     id: 3,
-    title: 'A Rainy Tuesday Reflection',
-    author: '@quiet_soul',
-    emotion: 'sad',
+    title: 'You Don’t Need to Have It All Figured Out',
+    author: '@mentora_official',
+    emotion: 'hopeful',
     cover: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&q=80&w=800',
-    description: 'It is okay to have days where you just sit and watch the rain. Society tells us we have to be productive 24/7, but sitting with sadness is productive too.',
+    description: 'A gentle reminder that it’s okay to figure things out as you go without rushing to a finish line.',
     pages: [
-      "It's okay to have days where you just sit and watch the rain. Today is one of those days for me.",
-      "Society tells us we have to be productive 24/7, but sitting with your sadness is productive too. It's allowing yourself to heal. Don't rush it."
+      "There is so much pressure to become successful quickly.\n\nTo know your purpose.\nTo build a perfect future.\nTo always stay productive.",
+      "But life is not meant to be solved like a math problem.\n\nYou are allowed to change directions.\nYou are allowed to outgrow people, dreams, and old versions of yourself.",
+      "The truth is:\nMost people are figuring life out as they go.\n\nNo one wakes up magically confident.\nNo one completely escapes fear.",
+      "The difference is that some people keep moving despite uncertainty.\n\nSo take small steps.\nLearn slowly.\nRest when needed.\nBegin again when necessary.",
+      "You do not need to become extraordinary overnight.\n\nYou just need to keep going long enough to discover who you can become."
     ],
-    comments: [
-      { id: 3, author: '@caring_friend', text: 'Sending you so much love. Take all the time you need.', date: 'March 6, 2026' }
+    comments: [],
+    date: 'May 22, 2026'
+  },
+  {
+    id: 4,
+    title: 'The Power of Small Wins',
+    author: '@mentora_official',
+    emotion: 'joy',
+    cover: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=800',
+    description: 'Celebrating the small victories that often go unnoticed but keep us moving forward.',
+    pages: [
+      "We often wait for massive achievements to feel proud of ourselves. The big promotion, the major milestone, the grand finish line.",
+      "But life is mostly built on small, seemingly invisible victories.\n\nGetting out of bed on a day you felt paralyzed.\nDrinking a glass of water.\nAnswering an email you’ve been avoiding.",
+      "These aren’t just 'basic tasks'. When your mind is heavy, doing the bare minimum is an act of defiance. It is a victory.",
+      "Stop waiting for a major breakthrough to celebrate yourself. Honor the tiny steps you took today. They are what eventually build a beautiful life."
     ],
-    date: 'March 5, 2026'
+    comments: [],
+    date: 'May 22, 2026'
+  },
+  {
+    id: 5,
+    title: 'Embracing the Unknown',
+    author: '@mentora_official',
+    emotion: 'anxious',
+    cover: 'https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&q=80&w=800',
+    description: 'Navigating the anxiety of uncertainty and finding peace in not knowing what comes next.',
+    pages: [
+      "Anxiety loves to convince us that if we can just plan everything, predict every outcome, we will be safe.",
+      "But the truth is, the unknown is where life actually happens.\nWe spend so much time trying to map out a future that hasn't arrived yet, exhausting ourselves with 'what ifs'.",
+      "What if, instead of preparing for the worst, we left a little room for things to go surprisingly well?",
+      "You don't need a guaranteed outcome to take the next step. You just need enough courage for today. Let tomorrow worry about itself."
+    ],
+    comments: [],
+    date: 'May 22, 2026'
+  },
+  {
+    id: 6,
+    title: 'You Are More Than Your Productivity',
+    author: '@mentora_official',
+    emotion: 'neutral',
+    cover: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&q=80&w=800',
+    description: 'Breaking free from the toxic mindset that your worth is determined by how much you get done.',
+    pages: [
+      "In a world obsessed with hustle, it is easy to start measuring your self-worth by how much you accomplished by 5 PM.",
+      "If you had a 'lazy' day, guilt creeps in. If you rested, you feel like you're falling behind.",
+      "But you are a human being, not a machine. Rest is not a reward for burning yourself out; it is a fundamental requirement for living.",
+      "Your value does not decrease on the days you do nothing. Simply existing, breathing, and experiencing the world is enough."
+    ],
+    comments: [],
+    date: 'May 22, 2026'
   }
 ];
 
@@ -123,22 +175,22 @@ const Storyteller = () => {
       setLoading(true);
       const token = localStorage.getItem('mentora_token');
       let url = 'http://localhost:5000/api/stories/public';
-      
+
       if (emotion && emotion !== 'all') {
         url += `?emotion=${emotion}`;
       }
-      
+
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
+      let fetchedStories = [];
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Transform backend data to match frontend format
-          const formattedStories = data.data.map(story => ({
+          fetchedStories = data.data.map(story => ({
             id: story.id,
             title: story.title,
             author: story.user.username || '@user',
@@ -156,15 +208,20 @@ const Storyteller = () => {
             })),
             date: new Date(story.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           }));
-          setStories(formattedStories);
         }
       } else {
         throw new Error('Failed to fetch stories');
       }
+
+      // Merge official default stories with fetched ones, ensuring no duplicate IDs
+      const combined = [...DEFAULT_STORIES, ...fetchedStories].filter((story, idx, self) =>
+        idx === self.findIndex(s => s.id === story.id)
+      );
+      setStories(combined);
     } catch (error) {
       console.error('Fetch stories error:', error);
       setError('Failed to load stories');
-      // Fallback to default stories
+      // Fallback to default stories only
       setStories(DEFAULT_STORIES);
     } finally {
       setLoading(false);
