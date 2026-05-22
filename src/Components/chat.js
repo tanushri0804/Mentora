@@ -13,6 +13,8 @@ import DeleteChatModal from './DeleteChatModal';
 import ChatCustomizer from './ChatCustomizer';
 import { useTheme } from '../context/ThemeContext';
 import './Chat.css';
+import { useAuth } from '../context/AuthContext';
+import LoginRequiredModal from './LoginRequiredModal';
 
 const defaultMentors = [
   { id: "mood-mentor", name: "Mood Mentor", author: "@mentora_official", interactions: "128k", desc: "Your steady companion for emotional balance.", image: moodAvtar },
@@ -48,6 +50,9 @@ const Chat = () => {
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toast, setToast] = useState(null);
+
+  const { isGuest } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Auto-dismiss toast after 3 seconds
   useEffect(() => {
@@ -323,6 +328,10 @@ const Chat = () => {
   }, [currentChatbot, loading, chatHistory.length, isCustomChatbot, selectedMentor, chatbotId, sessionId, navigate, aiId]);
 
   const handleUserInput = useCallback(async () => {
+    if (isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
     if (!userInput.trim() || (!selectedMentor && !currentChatbot)) return;
     
     const currentChat = [...chatHistory, { sender: "user", text: userInput }];
@@ -389,6 +398,10 @@ const Chat = () => {
   }, [userInput, chatHistory, selectedMentor, currentChatbot, isCustomChatbot, chatbotId, sessionId, loadChatbotData, loadOfficialChatbotData, aiId, navigate]);
 
   const handleNewChat = useCallback(async () => {
+    if (isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
     try {
       setLoading(true);
       const token = localStorage.getItem('mentora_token');
@@ -712,6 +725,12 @@ const Chat = () => {
       <ChatCustomizer 
         isOpen={showCustomizer}
         onClose={() => setShowCustomizer(false)}
+      />
+      {/* Login required modal for guests trying to chat/create */}
+      <LoginRequiredModal
+        isOpen={showAuthModal}
+        onConfirm={() => { setShowAuthModal(false); navigate('/login'); }}
+        onCancel={() => setShowAuthModal(false)}
       />
     </div></>
   );

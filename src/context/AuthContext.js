@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const savedToken = localStorage.getItem('mentora_token');
         const savedUser = localStorage.getItem('mentora_user');
+        const savedGuest = localStorage.getItem('mentora_guest');
         
         if (savedToken && savedUser) {
             try {
@@ -27,6 +28,9 @@ export const AuthProvider = ({ children }) => {
                 localStorage.removeItem('mentora_token');
                 localStorage.removeItem('mentora_user');
             }
+        } else if (savedGuest === 'true') {
+            // Persist guest session across reloads
+            setIsGuest(true);
         }
         setLoading(false);
     }, []);
@@ -35,6 +39,8 @@ export const AuthProvider = ({ children }) => {
     const saveAuthData = (userData, authToken) => {
         localStorage.setItem('mentora_token', authToken);
         localStorage.setItem('mentora_user', JSON.stringify(userData));
+        // Clear any guest flag when a real user logs in
+        localStorage.removeItem('mentora_guest');
         setUser(userData);
         setToken(authToken);
         setIsGuest(false);
@@ -45,6 +51,7 @@ export const AuthProvider = ({ children }) => {
     const clearAuthData = () => {
         localStorage.removeItem('mentora_token');
         localStorage.removeItem('mentora_user');
+        localStorage.removeItem('mentora_guest');
         setUser(null);
         setToken(null);
         setIsGuest(false);
@@ -114,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     // Login as guest
     const loginAsGuest = () => {
         clearAuthData();
+        localStorage.setItem('mentora_guest', 'true');
         setIsGuest(true);
         setError(null);
     };

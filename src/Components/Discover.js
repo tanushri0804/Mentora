@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaComment, FaPlus, FaTimes, FaLock, FaGlobe, FaRobot, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import LoginRequiredModal from './LoginRequiredModal';
 import { chatbotService } from '../services/chatbotService';
 import './Discover.css';
 
@@ -18,7 +19,8 @@ const PREMIUM_AVATARS = CATEGORIES.flatMap(cat =>
 
 const Discover = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, isGuest } = useAuth();
+    const [showAuthModal, setShowAuthModal] = useState(false);
     const [search, setSearch] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,18 +42,25 @@ const Discover = () => {
 
     // Load chatbots from API
     useEffect(() => {
-        if (user) {
-            loadChatbots();
-        }
+        // Always load public and official chatbots so guests can explore
+        loadChatbots();
     }, [user]);
 
     const loadChatbots = async () => {
         try {
             setLoading(true);
-            const [allBots, myBots] = await Promise.all([
-                chatbotService.getChatbots(),
-                chatbotService.getUserChatbots()
-            ]);
+            const allBots = await chatbotService.getChatbots();
+
+            let myBots = { data: [] };
+            if (user) {
+                try {
+                    myBots = await chatbotService.getUserChatbots();
+                } catch (err) {
+                    // If fetching user chatbots fails (e.g., unauthorized), ignore and continue
+                    console.warn('Could not load user chatbots:', err.message || err);
+                    myBots = { data: [] };
+                }
+            }
 
             setMyChatbots(myBots.data || []);
 
@@ -71,6 +80,10 @@ const Discover = () => {
 
     // Create new chatbot
     const handleCreateChatbot = async () => {
+        if (isGuest) {
+            setShowAuthModal(true);
+            return;
+        }
         if (!mentorName.trim() || !mentorDesc.trim()) {
             setError('Name and description are required');
             return;
@@ -378,11 +391,17 @@ const Discover = () => {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-                    <button className="create-mentor-btn" onClick={() => setIsCreating(true)}>
+                    <button className="create-mentor-btn" onClick={() => { if (isGuest) { setShowAuthModal(true); } else { setIsCreating(true); } }}>
                         <FaPlus size={12} /> Create
                     </button>
                 </div>
             </header>
+
+            <LoginRequiredModal
+                isOpen={showAuthModal}
+                onConfirm={() => { setShowAuthModal(false); window.location.href = '/login'; }}
+                onCancel={() => setShowAuthModal(false)}
+            />
 
             {filtered ? (
                 <section>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FaPen, FaTimes, FaGlobe, FaChevronLeft, FaChevronRight, FaPlus, FaBookOpen, FaCommentDots, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import './Storyteller.css';
+import { useAuth } from '../context/AuthContext';
+import LoginRequiredModal from './LoginRequiredModal';
 
 // Premium avatars from DiceBear API (same as in Profile component)
 const CATEGORIES = ['lorelei', 'adventurer', 'avataaars', 'bottts', 'notionists'];
@@ -440,7 +442,16 @@ const Storyteller = () => {
   const getEmotionDetails = (id) => EMOTIONS.find(e => e.id === id) || EMOTIONS[4];
 
   // Writing handlers
+  const { isGuest } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const startWriting = () => {
+    // Check guest
+    if (isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setEditStoryId(null);
     setNewTitle('');
     setNewDescription('');
@@ -501,6 +512,10 @@ const Storyteller = () => {
   };
 
   const handlePublish = async () => {
+    if (isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
     // Filter out completely empty pages
     const cleanPages = pages.map(p => p.trim()).filter(p => p.length > 0);
 
@@ -920,6 +935,7 @@ const Storyteller = () => {
   }
 
   return (
+    <>
     <div className="storyteller-container">
       {/* Header */}
       <div className="page-header fade-in-up">
@@ -1145,6 +1161,15 @@ const Storyteller = () => {
         </>
       )}
     </div>
+    <LoginRequiredModal
+      isOpen={showAuthModal}
+      title="Login required to write"
+      message="Creating and publishing stories requires an account so your entries are saved and linked to you. Log in to continue or cancel to keep browsing as a guest."
+      onConfirm={() => { setShowAuthModal(false); navigate('/login'); }}
+      onContinueAsGuest={() => { setShowAuthModal(false); }}
+      onCancel={() => setShowAuthModal(false)}
+    />
+    </>
   );
 };
 

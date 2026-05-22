@@ -9,11 +9,6 @@ const BottomNav = () => {
 
     return (
         <nav className="bottom-nav">
-            <div className="nav-logo-desktop">
-                <span className="logo-dot"></span>
-                <span className="logo-text">M</span>
-            </div>
-
             <NavLink
                 to="/chat/discover"
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
