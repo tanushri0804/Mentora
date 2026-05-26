@@ -27,6 +27,15 @@
     margin-top: 0.4rem;
 }
 
+/* Ensure the standalone Profile page header stacks vertically
+   (PublicProfile uses a different layout and sets .profile-header to flex).
+   This selector is scoped via .profile-container for higher specificity. */
+.profile-container .profile-header {
+  display: block;
+  align-items: normal;
+  gap: 0;
+}
+
 /* ---- Redesigned Profile Layout ---- */
 .profile-layout-container {
     display: grid;

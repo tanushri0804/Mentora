@@ -217,19 +217,7 @@ const Profile = () => {
                     </button>
                 </div>
 
-                <div className="settings-section disabled fade-in-up" style={{ animationDelay: '0.2s', opacity: 0.6, pointerEvents: 'none' }}>
-                    <div className="overlay-badge">Logged-in only</div>
-                    <h3>App Settings</h3>
-                    <div className="setting-item">
-                        <div className="setting-info">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <FaMoon style={{ color: 'var(--text-muted)' }} />
-                                <h4>Dark Mode</h4>
-                            </div>
-                        </div>
-                        <div className="toggle-switch active"><div className="toggle-knob"></div></div>
-                    </div>
-                </div>
+                {/* Removed App Settings block for guest users per UX preference */}
             </div>
         );
     }
