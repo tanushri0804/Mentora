@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaEnvelope, FaLock, FaUser, FaGoogle, FaArrowRight, FaEye, FaEyeSlash, FaHome } from 'react-icons/fa';
+import logo from '../assets/monogram.png';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -100,6 +101,10 @@ const LoginPage = () => {
           <div className="signin-signup">
             {/* SIGN IN FORM */}
             <form className="sign-in-form" onSubmit={handleSubmit}>
+              <div className="auth-logo-header">
+                <img src={logo} alt="Mentora" className="auth-logo-img" />
+                <span className="auth-logo-text">Mentora</span>
+              </div>
               <h2 className="form-title">Welcome Back</h2>
               <p className="form-subtitle">Enter your details to resume your journey.</p>
 
@@ -146,6 +151,10 @@ const LoginPage = () => {
 
             {/* SIGN UP FORM */}
             <form className="sign-up-form" onSubmit={handleSubmit}>
+              <div className="auth-logo-header">
+                <img src={logo} alt="Mentora" className="auth-logo-img" />
+                <span className="auth-logo-text">Mentora</span>
+              </div>
               <h2 className="form-title">Create Account</h2>
               <p className="form-subtitle">Start your path to mental clarity today.</p>
 

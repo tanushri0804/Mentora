@@ -50,11 +50,27 @@
 }
 
 .anime-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-weight: 900;
     font-size: 1.5rem;
     letter-spacing: 2px;
     color: white;
     text-shadow: 0 0 10px var(--anime-teal);
+}
+
+.anime-logo-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 0 8px var(--anime-teal));
+    transition: transform 0.3s ease;
+}
+
+.anime-logo:hover .anime-logo-img {
+    transform: scale(1.1) rotate(-5deg);
 }
 
 .anime-links {

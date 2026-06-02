@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/monogram.png';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -38,7 +39,10 @@ const HomePage = () => {
     <div className={`anime-hero-page ${loaded ? 'loaded' : ''}`}>
       {/* Top Navigation */}
       <nav className="anime-nav">
-        <div className="anime-logo">MENTORA.AI</div>
+        <div className="anime-logo">
+          <img src={logo} alt="Mentora" className="anime-logo-img" />
+          <span>MENTORA.AI</span>
+        </div>
       </nav>
 
       {/* Hero Section */}

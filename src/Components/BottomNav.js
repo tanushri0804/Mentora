@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaHeartbeat, FaLeaf, FaRainbow, FaCompass, FaRegCommentDots, FaUser } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/monogram.png';
 import './BottomNav.css';
 
 const BottomNav = () => {
@@ -9,6 +10,10 @@ const BottomNav = () => {
 
     return (
         <nav className="bottom-nav">
+            <div className="nav-logo-desktop">
+                <img src={logo} alt="Mentora" className="nav-logo-img" />
+                <span className="logo-text">Mentora</span>
+            </div>
             <NavLink
                 to="/chat/discover"
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}

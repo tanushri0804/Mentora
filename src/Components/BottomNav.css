@@ -32,8 +32,8 @@
         width: 100px;
         flex-direction: column;
         justify-content: flex-start;
-        padding: 1.5rem 0;
-        gap: 0.75rem;
+        padding: 0.75rem 0;
+        gap: 0.4rem;
         border-right: 1px solid var(--glass-border);
         border-left: none;
         border-top: none;
@@ -48,30 +48,53 @@
     .bottom-nav::-webkit-scrollbar {
         display: none;
     }
+
+    .nav-link {
+        padding: 8px 10px;
+        gap: 4px;
+    }
 }
 
 .nav-logo-desktop {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 2rem;
-    margin-top: 1rem;
-    opacity: 0.8;
+    gap: 6px;
+    margin-bottom: 0.75rem;
+    margin-top: 0.25rem;
+    opacity: 0.9;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
 }
 
-.logo-dot {
-    width: 12px;
-    height: 12px;
-    background: var(--primary-gradient);
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(42, 157, 143, 0.4);
+.nav-logo-desktop:hover {
+    opacity: 1;
+}
+
+.nav-logo-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 9px;
+    filter: drop-shadow(0 0 6px rgba(42, 157, 143, 0.35));
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+}
+
+.nav-logo-desktop:hover .nav-logo-img {
+    transform: scale(1.1) rotate(5deg);
+    filter: drop-shadow(0 0 10px rgba(42, 157, 143, 0.6));
 }
 
 .logo-text {
-    font-size: 1.25rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: white;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #ffffff 30%, #2a9d8f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: transform 0.3s ease;
 }
 
 @media (max-width: 768px) {
@@ -81,7 +104,6 @@
 }
 
 .nav-link {
-
     text-decoration: none;
     color: rgba(255, 255, 255, 0.4);
     display: flex;
@@ -90,16 +112,41 @@
     gap: 6px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    padding: 12px;
     border-radius: 16px;
-    width: 80%;
-    margin: 0 auto;
     flex-shrink: 0;
 }
 
-.nav-link.profile-link {
-    margin-top: auto;
-    margin-bottom: 1rem;
+/* Mobile: Nav Link Options */
+@media (max-width: 768px) {
+    .nav-link {
+        width: auto;
+        padding: 8px 6px;
+        margin: 0;
+    }
+    .nav-link.profile-link {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
+
+/* Desktop: Nav Link Options */
+@media (min-width: 769px) {
+    .nav-link {
+        width: 80%;
+        margin: 0 auto;
+        padding: 8px 10px;
+        gap: 4px;
+    }
+    .nav-link.profile-link {
+        margin-top: 1.25rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (min-width: 769px) and (min-height: 700px) {
+    .nav-link.profile-link {
+        margin-top: auto;
+    }
 }
 
 .nav-link svg {

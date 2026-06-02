@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import './MoodTracker.css';
 import { moodService } from '../services/moodService';
 import { useNavigate } from 'react-router-dom';
@@ -166,9 +166,47 @@ const REFRAME_PROMPTS = [
 
 const MEMORY_EMOJIS = ["🌈", "⚡", "🌙", "🎨", "🌿", "💎", "🔥", "🌸"];
 
+const QUICK_GAMES = [
+  { id: "tictactoe", emoji: "🎮", title: "Tic Tac Toe", desc: "Classic strategy vs CPU", color: "#f4a261", tags: ["Strategy"] },
+  { id: "memorymatch", emoji: "🃏", title: "Memory Match", desc: "Find all matching pairs", color: "#9b59b6", tags: ["Memory"] },
+  { id: "wordscramble", emoji: "🔤", title: "Word Scramble", desc: "Unscramble the hidden word", color: "#4ecdc4", tags: ["Words"] },
+  { id: "hangman", emoji: "🎯", title: "Hangman", desc: "Guess the hidden word", color: "#f4a261", tags: ["Words"] },
+  { id: "simon", emoji: "🎵", title: "Pattern Blast", desc: "Repeat the color sequence", color: "#2a9d8f", tags: ["Memory", "Speed"] },
+  { id: "reaction", emoji: "⚡", title: "Reaction Tap", desc: "Tap when the screen turns green", color: "#4caf7d", tags: ["Speed"] },
+  { id: "bubblepop", emoji: "🫧", title: "Bubble Pop", desc: "Pop as many as you can in 30s", color: "#4ecdc4", tags: ["Speed"] },
+  { id: "colormatch", emoji: "🎨", title: "Color Match", desc: "Tap the right color fast", color: "#457b9d", tags: ["Speed"] },
+  { id: "rps", emoji: "✊", title: "Rock Paper Scissors", desc: "Quick round against CPU", color: "#e07a5f", tags: ["Party"] },
+  { id: "dice", emoji: "🎲", title: "Dice Battle", desc: "Roll higher than the CPU", color: "#9b59b6", tags: ["Party"] },
+];
+
+const SIMON_PADS = [
+  { id: 0, hex: "#2a9d8f" },
+  { id: 1, hex: "#e07a5f" },
+  { id: 2, hex: "#f4a261" },
+  { id: 3, hex: "#9b59b6" },
+];
+
+const HANGMAN_WORDS = ["CALM", "PEACE", "JOY", "BRAVE", "FOCUS", "HAPPY", "DREAM", "SMILE", "RELAX", "LIGHT", "HOPE", "BLISS"];
+const HANGMAN_STAGES = ["", "😊", "🙂", "😐", "😬", "😰", "😵", "💫"];
+
+const RPS_CHOICES = [
+  { id: "rock", emoji: "🪨", label: "Rock" },
+  { id: "paper", emoji: "📄", label: "Paper" },
+  { id: "scissors", emoji: "✂️", label: "Scissors" },
+];
+
+const CALM_COLORS = [
+  { name: "Teal", hex: "#2a9d8f" },
+  { name: "Coral", hex: "#e07a5f" },
+  { name: "Gold", hex: "#f4a261" },
+  { name: "Lavender", hex: "#9b59b6" },
+  { name: "Mint", hex: "#4caf7d" },
+  { name: "Sky", hex: "#4ecdc4" },
+];
+
 // ─── ACTIVITY COMPONENTS ──────────────────────────────────────────────────
 
-const BreathingExercise = ({ onDone }) => {
+const BreathingExercise = ({ onDone, exitLabel = "Feeling better ✓" }) => {
   const [phase, setPhase] = useState("ready"); // ready | inhale | hold | exhale | done
   const [count, setCount] = useState(0);
   const [cycles, setCycles] = useState(0);
@@ -221,13 +259,13 @@ const BreathingExercise = ({ onDone }) => {
         <button className="activity-btn" onClick={() => setPhase("inhale")}>Start Breathing</button>
       )}
       {phase === "done" && (
-        <button className="activity-btn" onClick={onDone}>Feeling better ✓</button>
+        <button type="button" className="activity-btn" onClick={onDone}>{exitLabel}</button>
       )}
     </div>
   );
 };
 
-const AffirmationCard = ({ onDone }) => {
+const AffirmationCard = ({ onDone, exitLabel = "I needed that ✓" }) => {
   const [idx, setIdx] = useState(() => Math.floor(Math.random() * AFFIRMATIONS.length));
   const [flipped, setFlipped] = useState(false);
   return (
@@ -245,14 +283,14 @@ const AffirmationCard = ({ onDone }) => {
       {flipped && (
         <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
           <button className="activity-btn-outline" onClick={() => { setIdx((idx + 1) % AFFIRMATIONS.length); setFlipped(false); }}>New one</button>
-          <button className="activity-btn" onClick={onDone}>I needed that ✓</button>
+          <button type="button" className="activity-btn" onClick={onDone}>{exitLabel}</button>
         </div>
       )}
     </div>
   );
 };
 
-const GratitudePrompt = ({ onDone }) => {
+const GratitudePrompt = ({ onDone, exitLabel }) => {
   const [items, setItems] = useState(["", "", ""]);
   const filled = items.filter(i => i.trim()).length;
   return (
@@ -271,14 +309,14 @@ const GratitudePrompt = ({ onDone }) => {
           </div>
         ))}
       </div>
-      <button className="activity-btn" disabled={filled < 1} onClick={onDone} style={{ marginTop: "1.5rem" }}>
-        {filled >= 3 ? "Beautiful! Continue ✓" : filled > 0 ? `${filled}/3 — Continue anyway` : "Write at least one..."}
+      <button type="button" className="activity-btn" disabled={filled < 1} onClick={onDone} style={{ marginTop: "1.5rem" }}>
+        {exitLabel || (filled >= 3 ? "Beautiful! Continue ✓" : filled > 0 ? `${filled}/3 — Continue anyway` : "Write at least one...")}
       </button>
     </div>
   );
 };
 
-const TicTacToe = ({ onDone }) => {
+const TicTacToe = ({ onDone, standalone = false, exitLabel = "Done playing ✓" }) => {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [winner, setWinner] = useState(null);
   const [isX, setIsX] = useState(true);
@@ -315,24 +353,29 @@ const TicTacToe = ({ onDone }) => {
   const reset = () => { setBoard(Array(9).fill(null)); setWinner(null); setIsX(true); };
 
   return (
-    <div className="activity-center">
-      <p className="activity-subtitle">A quick game against the computer. You're X!</p>
-      {winner
-        ? <p className="ttt-status" style={{ color: winner === "X" ? "#4caf7d" : winner === "Draw" ? "#f4a261" : "#e07a5f" }}>
-          {winner === "Draw" ? "It's a Draw! 🤝" : winner === "X" ? "You won! 🎉" : "CPU wins! 🤖"}
-        </p>
-        : <p className="ttt-status">{isX ? "Your turn ✦" : "CPU thinking..."}</p>
-      }
-      <div className="ttt-grid">
+    <div className={`activity-center game-activity ${standalone ? "game-activity--standalone" : ""}`}>
+      {!standalone && <p className="activity-subtitle">A quick game against the computer. You're X!</p>}
+      <div className={`ttt-status-pill ${winner ? "ttt-status-pill--result" : ""}`}>
+        {winner
+          ? (winner === "Draw" ? "It's a Draw! 🤝" : winner === "X" ? "You won! 🎉" : "CPU wins! 🤖")
+          : (isX ? "Your turn — you're X" : "CPU is thinking...")}
+      </div>
+      <div className={`ttt-grid ${standalone ? "ttt-grid--play" : ""}`}>
         {board.map((s, i) => (
-          <button key={i} className={`ttt-sq ${s?.toLowerCase() || ""}`} onClick={() => handleClick(i)} disabled={!!s || !!winner || !isX}>
-            {s}
+          <button
+            key={i}
+            className={`ttt-sq ${s?.toLowerCase() || "empty"}`}
+            onClick={() => handleClick(i)}
+            disabled={!!s || !!winner || !isX}
+            aria-label={s ? `Cell ${s}` : "Empty cell"}
+          >
+            <span className="ttt-mark">{s || ""}</span>
           </button>
         ))}
       </div>
-      <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
-        <button className="activity-btn-outline" onClick={reset}>Restart</button>
-        <button className="activity-btn" onClick={onDone}>Done playing ✓</button>
+      <div className="game-actions">
+        <button type="button" className="activity-btn-outline" onClick={reset}>Play again</button>
+        <button type="button" className="activity-btn" onClick={onDone}>{exitLabel}</button>
       </div>
     </div>
   );
@@ -353,7 +396,7 @@ const QuoteCard = ({ onDone }) => {
   );
 };
 
-const WordScramble = ({ onDone }) => {
+const WordScramble = ({ onDone, exitLabel = "Continue ✓" }) => {
   const [wIdx] = useState(() => Math.floor(Math.random() * WORD_SCRAMBLES.length));
   const { scrambled, answer } = WORD_SCRAMBLES[wIdx];
   const [guess, setGuess] = useState("");
@@ -393,7 +436,7 @@ const WordScramble = ({ onDone }) => {
           <p style={{ color: solved ? "#4caf7d" : "#f4a261", fontSize: "1.3rem", fontWeight: 700 }}>
             {solved ? `✓ "${answer}" — Well done!` : `The answer was: "${answer}"`}
           </p>
-          <button className="activity-btn" onClick={onDone} style={{ marginTop: "1rem" }}>Continue ✓</button>
+          <button type="button" className="activity-btn" onClick={onDone} style={{ marginTop: "1rem" }}>{exitLabel}</button>
         </div>
       )}
     </div>
@@ -404,7 +447,6 @@ const WordScramble = ({ onDone }) => {
 const JournalActivity = ({ moodLevel, onDone }) => {
   const prompt = JOURNAL_PROMPTS[moodLevel] || JOURNAL_PROMPTS.okay;
   const [text, setText] = useState("");
-  const [done, setDone] = useState(false);
   return (
     <div className="activity-center" style={{ width: "100%" }}>
       <div className="journal-prompt-bubble">
@@ -420,13 +462,9 @@ const JournalActivity = ({ moodLevel, onDone }) => {
       />
       <div style={{ display: "flex", gap: "1rem", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
         <span className="journal-char-count">{text.length} characters</span>
-        {!done ? (
-          <button className="activity-btn" onClick={() => setDone(true)}>
-            {text.length > 10 ? "That felt good ✓" : "Skip for now"}
-          </button>
-        ) : (
-          <button className="activity-btn" onClick={onDone}>Continue →</button>
-        )}
+        <button className="activity-btn" onClick={onDone}>
+          {text.length > 10 ? "That felt good ✓" : "Skip for now"}
+        </button>
       </div>
     </div>
   );
@@ -485,7 +523,549 @@ const ReframeActivity = ({ onDone }) => {
 };
 
 // ─── MEMORY MATCH ─────────────────────────────────────────────────────────
-const MemoryMatch = ({ onDone }) => {
+const RockPaperScissors = ({ onDone, exitLabel = "Back to games" }) => {
+  const [playerPick, setPlayerPick] = useState(null);
+  const [cpuPick, setCpuPick] = useState(null);
+  const [stats, setStats] = useState({ wins: 0, losses: 0, draws: 0 });
+
+  const getWinner = (p, c) => {
+    if (p === c) return "draw";
+    if ((p === "rock" && c === "scissors") || (p === "paper" && c === "rock") || (p === "scissors" && c === "paper")) return "player";
+    return "cpu";
+  };
+
+  const play = (pick) => {
+    const cpu = RPS_CHOICES[Math.floor(Math.random() * RPS_CHOICES.length)].id;
+    setPlayerPick(pick);
+    setCpuPick(cpu);
+    const outcome = getWinner(pick, cpu);
+    setStats(s => ({
+      wins: s.wins + (outcome === "player" ? 1 : 0),
+      losses: s.losses + (outcome === "cpu" ? 1 : 0),
+      draws: s.draws + (outcome === "draw" ? 1 : 0),
+    }));
+  };
+
+  const outcome = playerPick && cpuPick ? getWinner(playerPick, cpuPick) : null;
+  const pickMeta = (id) => RPS_CHOICES.find(c => c.id === id);
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <div className="rps-scoreboard">
+        <span>Wins <strong>{stats.wins}</strong></span>
+        <span>Draws <strong>{stats.draws}</strong></span>
+        <span>Losses <strong>{stats.losses}</strong></span>
+      </div>
+      {playerPick && cpuPick ? (
+        <div className="rps-arena">
+          <div className="rps-pick">
+            <span className="rps-pick-label">You</span>
+            <span className="rps-pick-emoji">{pickMeta(playerPick)?.emoji}</span>
+          </div>
+          <span className="rps-vs">VS</span>
+          <div className="rps-pick">
+            <span className="rps-pick-label">CPU</span>
+            <span className="rps-pick-emoji">{pickMeta(cpuPick)?.emoji}</span>
+          </div>
+        </div>
+      ) : (
+        <p className="activity-subtitle">Pick rock, paper, or scissors to play.</p>
+      )}
+      {outcome && (
+        <p className={`rps-result rps-result--${outcome}`}>
+          {outcome === "player" ? "You win this round! 🎉" : outcome === "cpu" ? "CPU wins this round" : "It's a draw 🤝"}
+        </p>
+      )}
+      <div className="rps-choices">
+        {RPS_CHOICES.map(c => (
+          <button key={c.id} type="button" className="rps-choice-btn" onClick={() => play(c.id)}>
+            <span>{c.emoji}</span>
+            <small>{c.label}</small>
+          </button>
+        ))}
+      </div>
+      <div className="game-actions">
+        <button type="button" className="activity-btn-outline" onClick={() => { setPlayerPick(null); setCpuPick(null); }}>Clear round</button>
+        <button type="button" className="activity-btn" onClick={onDone}>{exitLabel}</button>
+      </div>
+    </div>
+  );
+};
+
+const ColorMatch = ({ onDone, exitLabel = "Back to games" }) => {
+  const TOTAL_ROUNDS = 5;
+  const [round, setRound] = useState(0);
+  const [target, setTarget] = useState(null);
+  const [options, setOptions] = useState([]);
+  const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [finished, setFinished] = useState(false);
+
+  const startRound = () => {
+    const shuffled = [...CALM_COLORS].sort(() => Math.random() - 0.5);
+    const correct = shuffled[0];
+    const picks = [correct, shuffled[1], shuffled[2], shuffled[3]].sort(() => Math.random() - 0.5);
+    setTarget(correct);
+    setOptions(picks);
+    setFeedback(null);
+  };
+
+  useEffect(() => { startRound(); }, []);
+
+  const handlePick = (color) => {
+    if (feedback || finished) return;
+    const correct = color.hex === target.hex;
+    if (correct) setScore(s => s + 1);
+    setFeedback(correct ? "correct" : "wrong");
+    setTimeout(() => {
+      if (round >= TOTAL_ROUNDS - 1) {
+        setFinished(true);
+      } else {
+        setRound(r => r + 1);
+        startRound();
+      }
+    }, 700);
+  };
+
+  if (finished) {
+    return (
+      <div className="activity-center game-activity game-activity--standalone">
+        <div className="color-match-done">
+          <span className="color-match-done-emoji">🎯</span>
+          <h3>You scored {score} / {TOTAL_ROUNDS}</h3>
+          <p>Nice focus — take a breath before your next game.</p>
+        </div>
+        <div className="game-actions">
+          <button type="button" className="activity-btn-outline" onClick={() => { setRound(0); setScore(0); setFinished(false); startRound(); }}>Play again</button>
+          <button type="button" className="activity-btn" onClick={onDone}>{exitLabel}</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <p className="activity-subtitle">Tap the swatch that matches the color name.</p>
+      <div className="color-match-header">
+        <span className="color-match-round">Round {round + 1} / {TOTAL_ROUNDS}</span>
+        <span className="color-match-score">Score: {score}</span>
+      </div>
+      <div className="color-match-prompt" style={{ borderColor: target?.hex }}>
+        Match: <strong style={{ color: target?.hex }}>{target?.name}</strong>
+      </div>
+      <div className="color-match-grid">
+        {options.map((c, i) => (
+          <button
+            key={`${c.hex}-${i}`}
+            type="button"
+            className={`color-match-swatch ${feedback && c.hex === target.hex ? "correct" : ""} ${feedback === "wrong" && c.hex !== target.hex ? "" : ""}`}
+            style={{ background: c.hex }}
+            onClick={() => handlePick(c)}
+            disabled={!!feedback}
+            aria-label={c.name}
+          />
+        ))}
+      </div>
+      {feedback && (
+        <p className={`color-match-feedback color-match-feedback--${feedback}`}>
+          {feedback === "correct" ? "Correct! ✓" : "Not quite — keep going"}
+        </p>
+      )}
+      <button type="button" className="activity-btn-outline" onClick={onDone}>{exitLabel}</button>
+    </div>
+  );
+};
+
+const SimonSays = ({ onDone, exitLabel = "Back to games" }) => {
+  const [sequence, setSequence] = useState([]);
+  const [playerStep, setPlayerStep] = useState(0);
+  const [level, setLevel] = useState(0);
+  const [activePad, setActivePad] = useState(null);
+  const [phase, setPhase] = useState("idle");
+  const [best, setBest] = useState(0);
+  const timersRef = useRef([]);
+
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  };
+
+  useEffect(() => () => clearTimers(), []);
+
+  const playSequence = (seq) => {
+    setPhase("showing");
+    setPlayerStep(0);
+    let i = 0;
+    const step = () => {
+      if (i >= seq.length) {
+        setActivePad(null);
+        setPhase("input");
+        return;
+      }
+      setActivePad(seq[i]);
+      timersRef.current.push(setTimeout(() => {
+        setActivePad(null);
+        timersRef.current.push(setTimeout(() => { i += 1; step(); }, 180));
+      }, 480));
+    };
+    step();
+  };
+
+  const startGame = () => {
+    clearTimers();
+    const first = [Math.floor(Math.random() * 4)];
+    setSequence(first);
+    setLevel(1);
+    setBest(0);
+    playSequence(first);
+  };
+
+  const handlePad = (id) => {
+    if (phase !== "input") return;
+    setActivePad(id);
+    timersRef.current.push(setTimeout(() => setActivePad(null), 160));
+    if (sequence[playerStep] !== id) {
+      setPhase("gameover");
+      setBest(b => Math.max(b, level - 1));
+      return;
+    }
+    const next = playerStep + 1;
+    if (next === sequence.length) {
+      const newSeq = [...sequence, Math.floor(Math.random() * 4)];
+      setSequence(newSeq);
+      setLevel(l => l + 1);
+      setBest(b => Math.max(b, level));
+      setPhase("levelup");
+      timersRef.current.push(setTimeout(() => playSequence(newSeq), 700));
+    } else {
+      setPlayerStep(next);
+    }
+  };
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <div className="mini-game-hud">
+        <span>Level <strong>{level || 1}</strong></span>
+        <span>Best <strong>{best}</strong></span>
+      </div>
+      {phase === "idle" && <p className="activity-subtitle">Watch the pattern, then repeat it. Each level adds one more step!</p>}
+      {phase === "gameover" && <p className="game-banner-msg game-banner-msg--lose">Game over — you reached level {Math.max(level, 1)}!</p>}
+      {phase === "levelup" && <p className="game-banner-msg game-banner-msg--win">Level {level}! Keep going...</p>}
+      <div className="simon-grid">
+        {SIMON_PADS.map(pad => (
+          <button
+            key={pad.id}
+            type="button"
+            className={`simon-pad ${activePad === pad.id ? "simon-pad--lit" : ""}`}
+            style={{ "--pad-color": pad.hex }}
+            onClick={() => handlePad(pad.id)}
+            disabled={phase !== "input"}
+          />
+        ))}
+      </div>
+      <div className="game-actions">
+        {phase === "idle" || phase === "gameover" ? (
+          <button type="button" className="activity-btn" onClick={startGame}>{phase === "gameover" ? "Try again" : "Start game"}</button>
+        ) : (
+          <button type="button" className="activity-btn-outline" disabled>Follow the pattern...</button>
+        )}
+        <button type="button" className="activity-btn-outline" onClick={onDone}>{exitLabel}</button>
+      </div>
+    </div>
+  );
+};
+
+const BubblePop = ({ onDone, exitLabel = "Back to games" }) => {
+  const [bubbles, setBubbles] = useState([]);
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [playing, setPlaying] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    if (!playing || finished) return;
+    const clock = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) {
+          setFinished(true);
+          setPlaying(false);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(clock);
+  }, [playing, finished]);
+
+  useEffect(() => {
+    if (!playing || finished) return;
+    const spawner = setInterval(() => {
+      idRef.current += 1;
+      setBubbles(prev => [
+        ...prev.slice(-14),
+        {
+          id: idRef.current,
+          left: 8 + Math.random() * 72,
+          size: 32 + Math.random() * 28,
+          hue: Math.floor(Math.random() * 360),
+        },
+      ]);
+    }, 550);
+    const mover = setInterval(() => {
+      setBubbles(prev => prev.map(b => ({ ...b, bottom: (b.bottom ?? -12) + 2.2 })).filter(b => (b.bottom ?? 0) < 108));
+    }, 45);
+    return () => { clearInterval(spawner); clearInterval(mover); };
+  }, [playing, finished]);
+
+  const start = () => {
+    setBubbles([]);
+    setScore(0);
+    setTimeLeft(30);
+    setFinished(false);
+    setPlaying(true);
+    idRef.current = 0;
+  };
+
+  const pop = (id) => {
+    setBubbles(prev => prev.filter(b => b.id !== id));
+    setScore(s => s + 1);
+  };
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <div className="mini-game-hud">
+        <span>Score <strong>{score}</strong></span>
+        <span>Time <strong>{playing ? `${timeLeft}s` : finished ? "0s" : "30s"}</strong></span>
+      </div>
+      {!playing && !finished && <p className="activity-subtitle">Pop floating bubbles before they drift away. You have 30 seconds!</p>}
+      {finished && <p className="game-banner-msg game-banner-msg--win">Time! You popped {score} bubbles 🫧</p>}
+      <div className="bubble-arena">
+        {bubbles.map(b => (
+          <button
+            key={b.id}
+            type="button"
+            className="bubble-item"
+            style={{
+              left: `${b.left}%`,
+              bottom: `${b.bottom ?? -12}%`,
+              width: b.size,
+              height: b.size,
+              background: `hsla(${b.hue}, 70%, 55%, 0.55)`,
+              boxShadow: `0 0 20px hsla(${b.hue}, 70%, 55%, 0.35)`,
+            }}
+            onClick={() => pop(b.id)}
+            disabled={!playing}
+            aria-label="Pop bubble"
+          />
+        ))}
+        {!playing && bubbles.length === 0 && <span className="bubble-arena-hint">Bubbles appear here</span>}
+      </div>
+      <div className="game-actions">
+        {!playing ? (
+          <button type="button" className="activity-btn" onClick={start}>{finished ? "Play again" : "Start popping"}</button>
+        ) : null}
+        <button type="button" className="activity-btn-outline" onClick={onDone}>{exitLabel}</button>
+      </div>
+    </div>
+  );
+};
+
+const ReactionTap = ({ onDone, exitLabel = "Back to games" }) => {
+  const [phase, setPhase] = useState("idle");
+  const [reactionMs, setReactionMs] = useState(null);
+  const [best, setBest] = useState(null);
+  const [rounds, setRounds] = useState([]);
+  const startRef = useRef(0);
+  const waitRef = useRef(null);
+
+  useEffect(() => () => { if (waitRef.current) clearTimeout(waitRef.current); }, []);
+
+  const startRound = () => {
+    if (waitRef.current) clearTimeout(waitRef.current);
+    setReactionMs(null);
+    setPhase("waiting");
+    waitRef.current = setTimeout(() => {
+      startRef.current = Date.now();
+      setPhase("go");
+    }, 1200 + Math.random() * 2800);
+  };
+
+  const handleTap = () => {
+    if (phase === "idle") startRound();
+    else if (phase === "waiting") {
+      if (waitRef.current) clearTimeout(waitRef.current);
+      setPhase("early");
+    } else if (phase === "go") {
+      const ms = Date.now() - startRef.current;
+      setReactionMs(ms);
+      setBest(b => (b === null ? ms : Math.min(b, ms)));
+      setRounds(r => [...r, ms]);
+      setPhase("result");
+    } else if (phase === "early" || phase === "result") {
+      startRound();
+    }
+  };
+
+  const avg = rounds.length ? Math.round(rounds.reduce((a, b) => a + b, 0) / rounds.length) : null;
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <div className="mini-game-hud">
+        <span>Best <strong>{best !== null ? `${best}ms` : "—"}</strong></span>
+        <span>Avg <strong>{avg !== null ? `${avg}ms` : "—"}</strong></span>
+      </div>
+      <button
+        type="button"
+        className={`reaction-zone reaction-zone--${phase}`}
+        onClick={handleTap}
+      >
+        {phase === "idle" && <span>Tap to start</span>}
+        {phase === "waiting" && <span>Wait for green...</span>}
+        {phase === "go" && <span>TAP NOW!</span>}
+        {phase === "early" && <span>Too soon! Tap to retry</span>}
+        {phase === "result" && <span>{reactionMs} ms — tap again</span>}
+      </button>
+      <p className="activity-subtitle">
+        {phase === "result" && reactionMs < 250 ? "Lightning fast! ⚡" : phase === "result" && reactionMs < 400 ? "Solid reflexes!" : "Don't tap until the box turns green."}
+      </p>
+      <button type="button" className="activity-btn-outline" onClick={onDone}>{exitLabel}</button>
+    </div>
+  );
+};
+
+const Hangman = ({ onDone, exitLabel = "Back to games" }) => {
+  const [word, setWord] = useState(() => HANGMAN_WORDS[Math.floor(Math.random() * HANGMAN_WORDS.length)]);
+  const [guessed, setGuessed] = useState([]);
+  const [wrong, setWrong] = useState(0);
+  const MAX_WRONG = 6;
+
+  const guess = (letter) => {
+    if (guessed.includes(letter) || won || lost) return;
+    setGuessed(g => [...g, letter]);
+    if (!word.includes(letter)) setWrong(w => w + 1);
+  };
+
+  const won = word.split("").every(l => guessed.includes(l));
+  const lost = wrong >= MAX_WRONG;
+  const display = word.split("").map(l => (guessed.includes(l) ? l : "_")).join(" ");
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  const newRound = () => {
+    let next = HANGMAN_WORDS[Math.floor(Math.random() * HANGMAN_WORDS.length)];
+    while (next === word && HANGMAN_WORDS.length > 1) {
+      next = HANGMAN_WORDS[Math.floor(Math.random() * HANGMAN_WORDS.length)];
+    }
+    setWord(next);
+    setGuessed([]);
+    setWrong(0);
+  };
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <div className="hangman-stage">{HANGMAN_STAGES[wrong] || "😊"}</div>
+      <p className="hangman-word">{display}</p>
+      <p className="hangman-lives">Wrong guesses: {wrong} / {MAX_WRONG}</p>
+      {won && <p className="game-banner-msg game-banner-msg--win">You got it — {word}! 🎉</p>}
+      {lost && <p className="game-banner-msg game-banner-msg--lose">The word was {word}</p>}
+      <div className="hangman-keyboard">
+        {letters.map(letter => {
+          const picked = guessed.includes(letter);
+          const correct = picked && word.includes(letter);
+          const miss = picked && !word.includes(letter);
+          return (
+            <button
+              key={letter}
+              type="button"
+              className={`hangman-key ${correct ? "hangman-key--ok" : ""} ${miss ? "hangman-key--bad" : ""}`}
+              onClick={() => guess(letter)}
+              disabled={picked || won || lost}
+            >
+              {letter}
+            </button>
+          );
+        })}
+      </div>
+      {(won || lost) && (
+        <div className="game-actions">
+          <button type="button" className="activity-btn-outline" onClick={newRound}>New word</button>
+        </div>
+      )}
+      <button type="button" className="activity-btn-outline" onClick={onDone}>{exitLabel}</button>
+    </div>
+  );
+};
+
+const DiceBattle = ({ onDone, exitLabel = "Back to games" }) => {
+  const [player, setPlayer] = useState(null);
+  const [cpu, setCpu] = useState(null);
+  const [rolling, setRolling] = useState(false);
+  const [stats, setStats] = useState({ wins: 0, losses: 0, draws: 0 });
+  const [lastResult, setLastResult] = useState(null);
+
+  const roll = () => {
+    if (rolling) return;
+    setRolling(true);
+    setLastResult(null);
+    let ticks = 0;
+    const interval = setInterval(() => {
+      setPlayer(Math.ceil(Math.random() * 6));
+      setCpu(Math.ceil(Math.random() * 6));
+      ticks += 1;
+      if (ticks >= 10) {
+        clearInterval(interval);
+        const p = Math.ceil(Math.random() * 6);
+        const c = Math.ceil(Math.random() * 6);
+        setPlayer(p);
+        setCpu(c);
+        setRolling(false);
+        let outcome = "draw";
+        if (p > c) outcome = "win";
+        else if (p < c) outcome = "lose";
+        setLastResult(outcome);
+        setStats(s => ({
+          wins: s.wins + (outcome === "win" ? 1 : 0),
+          losses: s.losses + (outcome === "lose" ? 1 : 0),
+          draws: s.draws + (outcome === "draw" ? 1 : 0),
+        }));
+      }
+    }, 70);
+  };
+
+  const diceFace = (n) => ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][n - 1] || "🎲";
+
+  return (
+    <div className="activity-center game-activity game-activity--standalone">
+      <div className="rps-scoreboard">
+        <span>Wins <strong>{stats.wins}</strong></span>
+        <span>Draws <strong>{stats.draws}</strong></span>
+        <span>Losses <strong>{stats.losses}</strong></span>
+      </div>
+      <div className="dice-arena">
+        <div className="dice-box">
+          <span className="dice-label">You</span>
+          <span className={`dice-face ${rolling ? "dice-face--roll" : ""}`}>{player ? diceFace(player) : "🎲"}</span>
+        </div>
+        <span className="rps-vs">VS</span>
+        <div className="dice-box">
+          <span className="dice-label">CPU</span>
+          <span className={`dice-face ${rolling ? "dice-face--roll" : ""}`}>{cpu ? diceFace(cpu) : "🎲"}</span>
+        </div>
+      </div>
+      {lastResult && !rolling && (
+        <p className={`rps-result rps-result--${lastResult === "win" ? "player" : lastResult === "lose" ? "cpu" : "draw"}`}>
+          {lastResult === "win" ? "You rolled higher! 🎉" : lastResult === "lose" ? "CPU rolled higher" : "Same roll — draw!"}
+        </p>
+      )}
+      <div className="game-actions">
+        <button type="button" className="activity-btn" onClick={roll} disabled={rolling}>{rolling ? "Rolling..." : "Roll dice"}</button>
+        <button type="button" className="activity-btn-outline" onClick={onDone}>{exitLabel}</button>
+      </div>
+    </div>
+  );
+};
+
+const MemoryMatch = ({ onDone, standalone = false, exitLabel = "Continue ✓" }) => {
   const shuffle = () => {
     const pairs = [...MEMORY_EMOJIS, ...MEMORY_EMOJIS]
       .sort(() => Math.random() - 0.5)
@@ -525,13 +1105,13 @@ const MemoryMatch = ({ onDone }) => {
   };
 
   return (
-    <div className="activity-center">
-      <p className="activity-subtitle">Flip cards to find matching pairs! 🃏</p>
+    <div className={`activity-center game-activity ${standalone ? "game-activity--standalone" : ""}`}>
+      {!standalone && <p className="activity-subtitle">Flip cards to find matching pairs! 🃏</p>}
       <div className="memory-stats">
         <span>Matches: <strong style={{ color: "#4caf7d" }}>{matchedCount / 2}/{MEMORY_EMOJIS.length}</strong></span>
         <span>Moves: <strong>{moves}</strong></span>
       </div>
-      <div className="memory-grid">
+      <div className={`memory-grid ${standalone ? "memory-grid--play" : ""}`}>
         {cards.map(card => (
           <div
             key={card.id}
@@ -546,15 +1126,16 @@ const MemoryMatch = ({ onDone }) => {
         ))}
       </div>
       {allMatched && (
-        <div style={{ textAlign: "center" }}>
-          <p style={{ color: "#4caf7d", fontWeight: 700, fontSize: "1.1rem" }}>
-            🎉 All matched in {moves} moves!
-          </p>
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <button className="activity-btn-outline" onClick={() => { setCards(shuffle()); setMoves(0); setSelected([]); }}>Play Again</button>
-            <button className="activity-btn" onClick={onDone}>Continue</button>
+        <div className="game-win-banner">
+          <p>🎉 All matched in {moves} moves!</p>
+          <div className="game-actions">
+            <button type="button" className="activity-btn-outline" onClick={() => { setCards(shuffle()); setMoves(0); setSelected([]); }}>Play again</button>
+            <button type="button" className="activity-btn" onClick={onDone}>{exitLabel}</button>
           </div>
         </div>
+      )}
+      {!allMatched && standalone && (
+        <button type="button" className="activity-btn-outline game-exit-only" onClick={onDone}>{exitLabel}</button>
       )}
     </div>
   );
@@ -565,12 +1146,14 @@ const MoodTracker = () => {
   const navigate = useNavigate();
   const { isGuest } = useAuth();
 
-  const [stage, setStage] = useState("welcome"); // welcome | quiz | result | plan | complete
+  const [stage, setStage] = useState("welcome"); // welcome | games | quickplay | quiz | result | plan | complete
   const [qIdx, setQIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [moodLevel, setMoodLevel] = useState(null);
   const [stepIdx, setStepIdx] = useState(0);
-  const [stepDone, setStepDone] = useState(false);
+  const [quickGameId, setQuickGameId] = useState(null);
+  const [gameQuery, setGameQuery] = useState("");
+  const [gameCategory, setGameCategory] = useState("All");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -601,10 +1184,10 @@ const MoodTracker = () => {
     }
   };
 
-  const startPlan = () => { setStepIdx(0); setStepDone(false); setStage("plan"); };
+  const startPlan = () => { setStepIdx(0); setStage("plan"); };
   const nextStep = () => {
     const plan = PLANS[moodLevel];
-    if (stepIdx < plan.length - 1) { setStepIdx(stepIdx + 1); setStepDone(false); }
+    if (stepIdx < plan.length - 1) setStepIdx(stepIdx + 1);
     else setStage("complete");
   };
 
@@ -614,10 +1197,59 @@ const MoodTracker = () => {
     setScore(0); 
     setMoodLevel(null); 
     setStepIdx(0); 
-    setStepDone(false); 
+    setQuickGameId(null);
+    setGameQuery("");
+    setGameCategory("All");
     setSaveError(null);
     setSaveSuccess(false);
-    setQuizAnswers([]); // Clear tracked answers
+    setQuizAnswers([]);
+  };
+
+  const openQuickGame = (gameId) => {
+    setQuickGameId(gameId);
+    setStage("quickplay");
+  };
+
+  const exitQuickGame = () => {
+    setQuickGameId(null);
+    setStage("games");
+  };
+
+  const allGameCategories = useMemo(() => {
+    const tags = new Set();
+    QUICK_GAMES.forEach(g => (g.tags || []).forEach(t => tags.add(t)));
+    return ["All", ...Array.from(tags).sort()];
+  }, []);
+
+  const filteredGames = useMemo(() => {
+    const q = gameQuery.trim().toLowerCase();
+    return QUICK_GAMES.filter(g => {
+      const inCategory = gameCategory === "All" ? true : (g.tags || []).includes(gameCategory);
+      if (!inCategory) return false;
+      if (!q) return true;
+      const hay = `${g.title} ${g.desc} ${(g.tags || []).join(" ")}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [gameQuery, gameCategory]);
+
+  const featuredGame = filteredGames[0] || QUICK_GAMES[0];
+
+  const renderQuickGame = (gameId, onExit) => {
+    const exitLabel = "← Back to games";
+    const props = { onDone: onExit, standalone: true, exitLabel };
+    switch (gameId) {
+      case "tictactoe": return <TicTacToe {...props} />;
+      case "memorymatch": return <MemoryMatch {...props} />;
+      case "wordscramble": return <WordScramble onDone={onExit} exitLabel={exitLabel} />;
+      case "rps": return <RockPaperScissors onDone={onExit} exitLabel={exitLabel} />;
+      case "colormatch": return <ColorMatch onDone={onExit} exitLabel={exitLabel} />;
+      case "simon": return <SimonSays onDone={onExit} exitLabel={exitLabel} />;
+      case "bubblepop": return <BubblePop onDone={onExit} exitLabel={exitLabel} />;
+      case "reaction": return <ReactionTap onDone={onExit} exitLabel={exitLabel} />;
+      case "hangman": return <Hangman onDone={onExit} exitLabel={exitLabel} />;
+      case "dice": return <DiceBattle onDone={onExit} exitLabel={exitLabel} />;
+      default: return null;
+    }
   };
 
   const saveMoodEntry = async () => {
@@ -686,13 +1318,13 @@ const MoodTracker = () => {
   const step = plan[stepIdx];
 
   const renderActivity = () => {
-    const onDone = () => setStepDone(true);
+    const onDone = nextStep;
     switch (step.type) {
       case "breathing": return <BreathingExercise onDone={onDone} />;
       case "affirmation": return <AffirmationCard onDone={onDone} />;
       case "gratitude": return <GratitudePrompt onDone={onDone} />;
       case "tictactoe": return <TicTacToe onDone={onDone} />;
-      case "quote": return <QuoteCard onDone={() => { onDone(); setTimeout(nextStep, 300); }} />;
+      case "quote": return <QuoteCard onDone={onDone} />;
       case "wordscramble": return <WordScramble onDone={onDone} />;
       case "journal": return <JournalActivity moodLevel={moodLevel} onDone={onDone} />;
       case "reframe": return <ReframeActivity onDone={onDone} />;
@@ -758,42 +1390,125 @@ const MoodTracker = () => {
   if (stage === "games") {
     return (
       <div className="mood-page">
-        <div className="welcome-dashboard">
-          <button className="back-btn" onClick={() => setStage("welcome")}>← Back</button>
-          <div className="welcome-hero" style={{ paddingTop: '0.5rem' }}>
-            <span className="welcome-hero-emoji">🎮</span>
-            <h1>Quick Games</h1>
-            <p>Take a break and clear your mind</p>
+        <div className="quickplay-hub">
+          <div className="quickplay-hub-topbar">
+            <button type="button" className="back-btn" onClick={() => setStage("welcome")}>← Back</button>
+            <div className="quickplay-hub-title">
+              <span className="hub-title-emoji">🎮</span>
+              <div>
+                <h1>Quick Play</h1>
+                <p>Chill games to reset your brain</p>
+              </div>
+            </div>
           </div>
-          <div className="welcome-games-grid">
-            <button className="welcome-game-card" onClick={() => { setMoodLevel("good"); setStage("plan"); setStepIdx(1); setStepDone(false); }}>
-              <span className="wgc-emoji">🎮</span>
-              <div className="wgc-info">
-                <h4>Tic Tac Toe</h4>
-                <p>Classic strategy</p>
+
+          <div className="quickplay-controls">
+            <div className="quickplay-search">
+              <span className="qp-search-icon">⌕</span>
+              <input
+                value={gameQuery}
+                onChange={(e) => setGameQuery(e.target.value)}
+                className="qp-search-input"
+                placeholder="Search games..."
+                type="text"
+              />
+              {gameQuery && (
+                <button type="button" className="qp-search-clear" onClick={() => setGameQuery("")}>×</button>
+              )}
+            </div>
+            <div className="quickplay-chips" role="tablist" aria-label="Game categories">
+              {allGameCategories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`qp-chip ${gameCategory === cat ? "active" : ""}`}
+                  onClick={() => setGameCategory(cat)}
+                  role="tab"
+                  aria-selected={gameCategory === cat}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="featured-game" style={{ "--game-accent": featuredGame.color }}>
+            <div className="featured-bg" />
+            <div className="featured-content">
+              <div className="featured-badge">Featured</div>
+              <div className="featured-main">
+                <span className="featured-emoji">{featuredGame.emoji}</span>
+                <div className="featured-text">
+                  <h2>{featuredGame.title}</h2>
+                  <p>{featuredGame.desc}</p>
+                  <div className="featured-tags">
+                    {(featuredGame.tags || []).map(t => <span key={t} className="featured-tag">{t}</span>)}
+                  </div>
+                </div>
               </div>
-            </button>
-            <button className="welcome-game-card" onClick={() => { setMoodLevel("thriving"); setStage("plan"); setStepIdx(1); setStepDone(false); }}>
-              <span className="wgc-emoji">🃏</span>
-              <div className="wgc-info">
-                <h4>Memory Match</h4>
-                <p>Test your memory</p>
+              <div className="featured-actions">
+                <button type="button" className="featured-play" onClick={() => openQuickGame(featuredGame.id)}>
+                  Play now →
+                </button>
               </div>
-            </button>
-            <button className="welcome-game-card" onClick={() => { setMoodLevel("thriving"); setStage("plan"); setStepIdx(0); setStepDone(false); }}>
-              <span className="wgc-emoji">🔤</span>
-              <div className="wgc-info">
-                <h4>Word Scramble</h4>
-                <p>Unscramble the words</p>
+            </div>
+          </div>
+
+          <div className="hub-grid-header">
+            <h3>All games</h3>
+            <span className="hub-grid-count">{filteredGames.length} available</span>
+          </div>
+
+          <div className="hub-grid">
+            {filteredGames.length === 0 ? (
+              <div className="hub-empty">
+                <p>No games found.</p>
+                <button type="button" className="activity-btn-outline" onClick={() => { setGameQuery(""); setGameCategory("All"); }}>Reset filters</button>
               </div>
-            </button>
-            <button className="welcome-game-card" onClick={() => { setMoodLevel("okay"); setStage("plan"); setStepIdx(0); setStepDone(false); }}>
-              <span className="wgc-emoji">🫁</span>
-              <div className="wgc-info">
-                <h4>Breathing</h4>
-                <p>Relax & focus</p>
-              </div>
-            </button>
+            ) : (
+              filteredGames.map((game) => (
+                <button
+                  key={game.id}
+                  type="button"
+                  className="hub-card"
+                  style={{ "--game-accent": game.color }}
+                  onClick={() => openQuickGame(game.id)}
+                >
+                  <span className="hub-card-glow" />
+                  <div className="hub-card-top">
+                    <span className="hub-card-emoji">{game.emoji}</span>
+                    <span className="hub-card-title">{game.title}</span>
+                  </div>
+                  <p className="hub-card-desc">{game.desc}</p>
+                  <div className="hub-card-tags">
+                    {(game.tags || []).slice(0, 2).map(t => <span key={t} className="hub-card-tag">{t}</span>)}
+                    <span className="hub-card-cta">Play →</span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── STANDALONE QUICK PLAY (no step counter) ──
+  if (stage === "quickplay" && quickGameId) {
+    const gameMeta = QUICK_GAMES.find((g) => g.id === quickGameId);
+    return (
+      <div className="mood-page">
+        <div className="quickplay-wrap">
+          <button type="button" className="back-btn" onClick={exitQuickGame}>← Back</button>
+          <div className="quickplay-header" style={{ "--game-accent": gameMeta?.color || "#2a9d8f" }}>
+            <span className="quickplay-icon">{gameMeta?.emoji}</span>
+            <div>
+              <h2>{gameMeta?.title}</h2>
+              <p>{gameMeta?.desc}</p>
+            </div>
+          </div>
+          <div className="quickplay-card">
+            {renderQuickGame(quickGameId, exitQuickGame)}
           </div>
         </div>
       </div>
@@ -878,12 +1593,6 @@ const MoodTracker = () => {
               {renderActivity()}
             </div>
           </div>
-
-          {stepDone && (
-            <button className="activity-btn" style={{ width: "100%", marginTop: "1.5rem", background: meta.color }} onClick={nextStep}>
-              {stepIdx < plan.length - 1 ? `Next Step →` : "Finish Session 🎉"}
-            </button>
-          )}
         </div>
       </div>
     );

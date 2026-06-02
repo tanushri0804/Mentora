@@ -181,6 +181,39 @@ form.sign-up-form {
 }
 
 /* Titles and Fields */
+.auth-logo-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.auth-logo-header:hover {
+    transform: translateY(-2px);
+}
+
+.auth-logo-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 0 6px rgba(42, 157, 143, 0.4));
+}
+
+.auth-logo-text {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #ffffff 40%, #2a9d8f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .form-title {
     font-size: 1.6rem;
     color: white;
@@ -190,7 +223,7 @@ form.sign-up-form {
 
 .form-subtitle {
     color: #94a3b8;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     text-align: center;
     font-size: 0.85rem;
     max-width: 260px;

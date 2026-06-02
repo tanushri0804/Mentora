@@ -64,6 +64,7 @@ const Chat = () => {
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [sessionId, setSessionId] = useState(currentSessionId);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Define functions before using them
   const loadChatbotData = useCallback(async () => {
@@ -158,6 +159,12 @@ const Chat = () => {
 
   useEffect(() => {
     scrollToBottom();
+  }, [isTyping]);
+
+  useEffect(() => {
+    if (!isTyping) {
+      inputRef.current?.focus();
+    }
   }, [isTyping]);
 
   useEffect(() => {
@@ -647,6 +654,7 @@ const Chat = () => {
           onKeyPress={(e) => e.key === 'Enter' && !isTyping && handleUserInput()}
           placeholder={isTyping ? `${selectedMentor} is typing...` : `Talk to ${selectedMentor}...`}
           disabled={isTyping}
+          ref={inputRef}
         />
         <button className="send-btn-icon" onClick={isTyping ? undefined : handleUserInput} disabled={isTyping}>
           <FaPaperPlane />
