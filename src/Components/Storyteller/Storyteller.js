@@ -5,6 +5,8 @@ import './Storyteller.css';
 import { useAuth } from '../../context/AuthContext';
 import LoginRequiredModal from '../LoginRequiredModal/LoginRequiredModal';
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
 // Premium avatars from DiceBear API (same as in Profile component)
 const CATEGORIES = ['lorelei', 'adventurer', 'avataaars', 'bottts', 'notionists'];
 const PREMIUM_AVATARS = CATEGORIES.flatMap(cat =>
@@ -150,8 +152,8 @@ const Storyteller = () => {
   const navigate = useNavigate();
   const [stories, setStories] = useState([]);
   const [userComments, setUserComments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true); // eslint-disable-line no-unused-vars
+  const [error, setError] = useState(''); // eslint-disable-line no-unused-vars
   const [activeFilter, setActiveFilter] = useState('all');
   const [currentTab, setCurrentTab] = useState('community'); // 'community', 'my-stories', 'my-comments'
 
@@ -176,7 +178,7 @@ const Storyteller = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('mentora_token');
-      let url = 'http://localhost:5000/api/stories/public';
+      let url = `${API_BASE}/stories/public`;
 
       if (emotion && emotion !== 'all') {
         url += `?emotion=${emotion}`;
@@ -235,7 +237,7 @@ const Storyteller = () => {
       setLoading(true);
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch('http://localhost:5000/api/stories/my-stories', {
+      const response = await fetch(`${API_BASE}/stories/my-stories`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -275,8 +277,8 @@ const Storyteller = () => {
     try {
       const token = localStorage.getItem('mentora_token');
       const url = editStoryId 
-        ? `http://localhost:5000/api/stories/${editStoryId}`
-        : 'http://localhost:5000/api/stories';
+        ? `${API_BASE}/stories/${editStoryId}`
+        : `${API_BASE}/stories`;
       
       const method = editStoryId ? 'PUT' : 'POST';
       
@@ -306,7 +308,7 @@ const Storyteller = () => {
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch(`http://localhost:5000/api/stories/${storyId}`, {
+      const response = await fetch(`${API_BASE}/stories/${storyId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -328,7 +330,7 @@ const Storyteller = () => {
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch(`http://localhost:5000/api/stories/${storyId}/comments`, {
+      const response = await fetch(`${API_BASE}/stories/${storyId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -354,7 +356,7 @@ const Storyteller = () => {
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch('http://localhost:5000/api/stories/my-comments', {
+      const response = await fetch(`${API_BASE}/stories/my-comments`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -386,7 +388,7 @@ const Storyteller = () => {
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch(`http://localhost:5000/api/stories/comments/${commentId}`, {
+      const response = await fetch(`${API_BASE}/stories/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

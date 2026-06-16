@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import './Toast.css';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { FaPaperPlane, FaEllipsisH, FaPlus, FaHistory, FaUserCog, FaThumbtack, FaUserCircle, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaArrowLeft, FaRobot, FaComment, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaPaperPlane, FaEllipsisH, FaPlus, FaHistory, FaUserCog, FaThumbsUp, FaThumbsDown, FaShareAlt, FaFlag, FaArrowLeft, FaRobot, FaComment, FaTrash, FaTimes } from 'react-icons/fa';
 import moodAvtar from '../../assets/moodAvtar.png';
 import dreamAvtar from '../../assets/dreamAvtar.png';
 import relationshipAvtar from '../../assets/relationshipAvtar.png';
@@ -15,6 +15,15 @@ import { useTheme } from '../../context/ThemeContext';
 import './Chat.css';
 import { useAuth } from '../../context/AuthContext';
 import LoginRequiredModal from '../LoginRequiredModal/LoginRequiredModal';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
+// Replace {{user}} token with the actual user's display name
+const resolveTokens = (text, userName) => {
+  if (!text) return text;
+  const name = userName || 'there';
+  return text.replace(/\{\{user\}\}/gi, name);
+};
 
 // ── Keyword → Wellness activity suggestions ──────────────────────────────
 const ACTIVITY_SUGGESTIONS = [
@@ -172,7 +181,7 @@ const Chat = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const { isGuest } = useAuth();
+  const { isGuest, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Auto-dismiss toast after 3 seconds
@@ -207,7 +216,7 @@ const Chat = () => {
     try {
       setLoading(true);
       console.log('Loading official chatbot data for:', mentorName);
-      const response = await fetch(`http://localhost:5000/api/chatbots/name/${mentorName}`, {
+      const response = await fetch(`${API_BASE}/chatbots/name/${mentorName}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('mentora_token')}`
         }
@@ -312,7 +321,7 @@ const Chat = () => {
           // First, try to load conversation history from session if sessionId is provided
           if (sessionId) {
             try {
-              const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}/messages`, {
+              const response = await fetch(`${API_BASE}/sessions/${sessionId}/messages`, {
                 headers: {
                   'Authorization': `Bearer ${localStorage.getItem('mentora_token')}`
                 }
@@ -340,7 +349,7 @@ const Chat = () => {
           const targetCompanionId = chatbotId || currentChatbot?.id;
           if (!sessionId && targetCompanionId) {
             try {
-              const response = await fetch(`http://localhost:5000/api/sessions/ai/${targetCompanionId}`, {
+              const response = await fetch(`${API_BASE}/sessions/ai/${targetCompanionId}`, {
                 headers: {
                   'Authorization': `Bearer ${localStorage.getItem('mentora_token')}`
                 }
@@ -354,7 +363,7 @@ const Chat = () => {
                   console.log('Found recent session:', mostRecentSession.id);
                   
                   // Load messages from the most recent session
-                  const messagesResponse = await fetch(`http://localhost:5000/api/sessions/${mostRecentSession.id}/messages`, {
+                  const messagesResponse = await fetch(`${API_BASE}/sessions/${mostRecentSession.id}/messages`, {
                     headers: {
                       'Authorization': `Bearer ${localStorage.getItem('mentora_token')}`
                     }
@@ -396,14 +405,14 @@ const Chat = () => {
             console.log('Using intro from database:', currentChatbot.intro);
             setChatHistory([{ 
               sender: "bot", 
-              text: currentChatbot.intro 
+              text: resolveTokens(currentChatbot.intro, user?.name || user?.username)
             }]);
             return;
           }
 
           console.log('No intro found, using fallback API call');
           // Fallback: Make API call to get greeting
-          const response = await fetch('http://localhost:5000/api/chat/message', {
+          const response = await fetch(`${API_BASE}/chat/message`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -436,7 +445,7 @@ const Chat = () => {
               : `Hello! I'm ${selectedMentor}. How can I help you today?`;
             setChatHistory([{ 
               sender: "bot", 
-              text: greeting
+              text: resolveTokens(greeting, user?.name || user?.username)
             }]);
           }
         } catch (error) {
@@ -446,14 +455,14 @@ const Chat = () => {
             : `Hello! I'm ${selectedMentor}. How can I help you today?`;
           setChatHistory([{ 
             sender: "bot", 
-            text: greeting
+            text: resolveTokens(greeting, user?.name || user?.username)
           }]);
         }
       };
 
       initializeChat();
     }
-  }, [currentChatbot, loading, chatHistory.length, isCustomChatbot, selectedMentor, chatbotId, sessionId, navigate, aiId]);
+  }, [currentChatbot, loading, chatHistory.length, isCustomChatbot, selectedMentor, chatbotId, sessionId, navigate, aiId, user]);
 
   const handleUserInput = useCallback(async () => {
     if (isGuest) {
@@ -471,7 +480,7 @@ const Chat = () => {
     setIsTyping(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/chat/message', {
+      const response = await fetch(`${API_BASE}/chat/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -525,7 +534,7 @@ const Chat = () => {
         suggestions: detectSuggestions(message)
       }]);
     }
-  }, [userInput, chatHistory, selectedMentor, currentChatbot, isCustomChatbot, chatbotId, sessionId, loadChatbotData, loadOfficialChatbotData, aiId, navigate]);
+  }, [userInput, chatHistory, selectedMentor, currentChatbot, isCustomChatbot, chatbotId, sessionId, loadChatbotData, loadOfficialChatbotData, aiId, navigate, isGuest]);
 
   const handleNewChat = useCallback(async () => {
     if (isGuest) {
@@ -543,7 +552,7 @@ const Chat = () => {
       }
       
       console.log('Creating new session for companion:', targetCompanionId);
-      const response = await fetch('http://localhost:5000/api/sessions', {
+      const response = await fetch(`${API_BASE}/sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -575,7 +584,7 @@ const Chat = () => {
     } finally {
       setLoading(false);
     }
-  }, [isCustomChatbot, chatbotId, aiId, currentChatbot, navigate]);
+  }, [isCustomChatbot, chatbotId, aiId, currentChatbot, navigate, isGuest]);
 
   const handleHistoryClick = useCallback(() => {
     setShowChatHistory(true);
@@ -602,7 +611,7 @@ const Chat = () => {
       if (sessionId) {
         // Delete the specific active session
         const token = localStorage.getItem('mentora_token');
-        const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}`, {
+        const response = await fetch(`${API_BASE}/sessions/${sessionId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

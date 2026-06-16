@@ -33,6 +33,7 @@ const MoodHistory = () => {
     }
     fetchMoodEntries();
     fetchMoodStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, isGuest]);
 
   const fetchMoodEntries = async () => {
@@ -100,6 +101,7 @@ const MoodHistory = () => {
     return '#457b9d'; // Low - blue
   };
 
+  // eslint-disable-next-line no-unused-vars
   const toggleExpandedEntry = (entryId) => {
     const newExpanded = new Set(expandedEntries);
     if (newExpanded.has(entryId)) {
@@ -110,6 +112,7 @@ const MoodHistory = () => {
     setExpandedEntries(newExpanded);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const parseExerciseDetails = (detailsString) => {
     try {
       return JSON.parse(detailsString);

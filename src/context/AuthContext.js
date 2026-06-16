@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
     const [isGuest, setIsGuest] = useState(false);
@@ -58,24 +58,49 @@ export const AuthProvider = ({ children }) => {
         setError(null);
     };
 
-    // Register new user
-    const register = async (userData) => {
+    // Step 1 — Send OTP to email
+    const sendRegisterOTP = async (userData) => {
         try {
             setLoading(true);
             setError(null);
-            
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+
+            const response = await fetch(`${API_BASE_URL}/auth/register/send-otp`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
+                throw new Error(data.message || 'Failed to send verification code');
+            }
+
+            return data;
+        } catch (error) {
+            setError(error.message);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Step 2 — Verify OTP and create account
+    const verifyRegisterOTP = async (email, code) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await fetch(`${API_BASE_URL}/auth/register/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Verification failed');
             }
 
             saveAuthData(data.data.user, data.data.token);
@@ -126,6 +151,34 @@ export const AuthProvider = ({ children }) => {
         setError(null);
     };
 
+    // Login with Google (credential = ID token from @react-oauth/google)
+    const loginWithGoogle = async (credential) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await fetch(`${API_BASE_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Google login failed');
+            }
+
+            saveAuthData(data.data.user, data.data.token);
+            return data;
+        } catch (error) {
+            setError(error.message);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Logout
     const logout = () => {
         clearAuthData();
@@ -164,8 +217,10 @@ export const AuthProvider = ({ children }) => {
             token, 
             loading, 
             error,
-            register, 
-            login, 
+            sendRegisterOTP,
+            verifyRegisterOTP,
+            login,
+            loginWithGoogle,
             loginAsGuest, 
             logout, 
             getProfile 

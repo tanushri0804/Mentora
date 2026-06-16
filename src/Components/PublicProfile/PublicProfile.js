@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaRobot, FaCalendar, FaMapMarkerAlt, FaGlobe, FaLink, FaUserCircle, FaUser } from 'react-icons/fa';
+import { FaArrowLeft, FaRobot, FaCalendar, FaMapMarkerAlt, FaLink, FaUserCircle } from 'react-icons/fa';
 import './PublicProfile.css';
 
 // Premium avatars from DiceBear API (same as in Profile component)
@@ -25,7 +25,8 @@ const PublicProfile = () => {
     const fetchPublicProfile = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/profile/public/${username}`);
+        const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_BASE}/profile/public/${username}`);
         
         if (response.ok) {
           const data = await response.json();

@@ -6,7 +6,7 @@ import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { user, loading, loginAsGuest, logout } = useAuth();
+  const { user, loading, loginAsGuest } = useAuth();
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {

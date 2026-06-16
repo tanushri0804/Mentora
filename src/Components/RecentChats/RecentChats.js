@@ -3,6 +3,8 @@ import { FaRobot, FaComment, FaClock, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import './RecentChats.css';
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
 const RecentChats = () => {
   const [recentChats, setRecentChats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ const RecentChats = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/chat/recent', {
+      const response = await fetch(`${API_BASE}/chat/recent`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

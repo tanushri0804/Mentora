@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaTrash, FaEdit, FaClock, FaComment } from 'react-icons/fa';
 import './ChatHistory.css';
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
 const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
       setLoading(true);
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch(`http://localhost:5000/api/sessions/ai/${aiId}`, {
+      const response = await fetch(`${API_BASE}/sessions/ai/${aiId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -43,7 +45,7 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch('http://localhost:5000/api/sessions', {
+      const response = await fetch(`${API_BASE}/sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +77,7 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}`, {
+      const response = await fetch(`${API_BASE}/sessions/${sessionId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -98,7 +100,7 @@ const ChatHistory = ({ aiId, mentorName, isOpen, onClose, onSelectSession }) => 
     try {
       const token = localStorage.getItem('mentora_token');
       
-      const response = await fetch(`http://localhost:5000/api/sessions/${sessionId}/title`, {
+      const response = await fetch(`${API_BASE}/sessions/${sessionId}/title`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

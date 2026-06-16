@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaCamera, FaSignOutAlt, FaMoon, FaSignInAlt, FaMapMarkerAlt, FaGlobe, FaSave, FaTimes } from 'react-icons/fa';
+import { FaUser, FaCamera, FaSignOutAlt, FaSignInAlt, FaMapMarkerAlt, FaGlobe, FaSave, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 import './ProfileEnhanced.css';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 // List of premium avatars from DiceBear API (60 total: 12 per category)
 const CATEGORIES = ['lorelei', 'adventurer', 'avataaars', 'bottts', 'notionists'];
@@ -86,7 +88,7 @@ const Profile = () => {
 
     const fetchProfileOptions = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/profile/options');
+            const response = await fetch(`${API_BASE}/profile/options`);
             const data = await response.json();
             if (data.success) {
                 setProfileOptions({
@@ -104,7 +106,7 @@ const Profile = () => {
     const loadUserProfile = async () => {
         try {
             console.log('Loading user profile...');
-            const response = await fetch('http://localhost:5000/api/profile', {
+            const response = await fetch(`${API_BASE}/profile`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -162,7 +164,7 @@ const Profile = () => {
             setError('');
             setSuccess('');
 
-            const response = await fetch('http://localhost:5000/api/profile/update', {
+            const response = await fetch(`${API_BASE}/profile/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

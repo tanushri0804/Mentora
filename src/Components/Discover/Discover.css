@@ -644,3 +644,171 @@
         height: 75px;
     }
 }
+
+/* ===== Intro Message Token Bar ===== */
+.intro-field-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.intro-field-wrapper .creator-input {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+
+.intro-token-bar {
+    background: rgba(42, 157, 143, 0.06);
+    border: 1px solid rgba(42, 157, 143, 0.2);
+    border-top: 1px dashed rgba(42, 157, 143, 0.25);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding: 0.55rem 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.intro-token-hint {
+    font-size: 0.72rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.intro-token-chip {
+    background: rgba(42, 157, 143, 0.15);
+    border: 1px solid rgba(42, 157, 143, 0.35);
+    color: #2a9d8f;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+}
+
+.intro-token-chip:hover {
+    background: rgba(42, 157, 143, 0.28);
+    border-color: #2a9d8f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(42, 157, 143, 0.2);
+}
+
+.intro-token-example {
+    font-size: 0.72rem;
+    color: #4b5563;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .intro-token-example {
+        display: none;
+    }
+}
+
+/* ===== Section title row with hint ===== */
+.section-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 2rem 0 1rem;
+}
+
+.section-title-row .section-title {
+    margin: 0;
+}
+
+.section-hint {
+    font-size: 0.75rem;
+    color: #4b5563;
+    font-style: italic;
+}
+
+/* ===== Form error banner ===== */
+.form-error-banner {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+}
+
+.form-error-banner button {
+    background: none;
+    border: none;
+    color: #f87171;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+/* ===== Creator submit spinner ===== */
+.creator-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== Edit + Delete always visible on owned cards ===== */
+.ai-card .card-action-btns {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.ai-card:hover .card-action-btns {
+    opacity: 1;
+}
+
+.card-edit-btn {
+    background: transparent;
+    border: none;
+    color: #2a9d8f;
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0.25rem 0.45rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.card-edit-btn:hover {
+    background: rgba(42, 157, 143, 0.15);
+}
+
+.card-delete-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0.25rem 0.45rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.card-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.12);
+}

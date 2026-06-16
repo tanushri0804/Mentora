@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ChatList.css';
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
 const ChatList = () => {
     const [recentChats, setRecentChats] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -9,6 +11,7 @@ const ChatList = () => {
 
     useEffect(() => {
         loadRecentChats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadRecentChats = async () => {
@@ -19,7 +22,7 @@ const ChatList = () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:5000/api/chat/recent', {
+            const response = await fetch(`${API_BASE}/chat/recent`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
