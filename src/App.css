@@ -24,6 +24,14 @@
   .content-area {
     padding-bottom: 100px;
   }
+
+  .app-main-layout.in-chat-room .bottom-nav {
+    display: none;
+  }
+
+  .app-main-layout.in-chat-room .content-area {
+    padding-bottom: 0;
+  }
 }
 
 @media (min-width: 769px) {
